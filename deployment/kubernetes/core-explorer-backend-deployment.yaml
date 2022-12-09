@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: core-explorer-backend
+  name: core-explorer-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: core-explorer-backend
+  template:
+    metadata:
+      labels:
+        app: core-explorer-backend
+    spec:
+      containers:
+        - env:
+            - name: GRPC_URL
+              value:
+            - name: REDIS_URL
+              value:
+            - name: MONGODB_DATABASE
+              value:
+            - name: PROVIDER_URL
+              value:
+            - name: AVATAR_LEGACY_CONTRACT
+              value:
+            - name: ASSET_LEGACY_CONTRACT
+              value:
+            - name: GEM_LEGACY_CONTRACT
+              value:
+            - name: GAME_LEGACY_CONTRACT
+              value:
+            - name: GAMES_DIRECTORY_CONTRACT
+              value:
+          envFrom:
+            - secretRef:
+                name: core-explorer-backend
+          image: 
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            tcpSocket:
+              port: 50051
+            timeoutSeconds: 1
+          name: core-explorer-backend
+          ports:
+            - containerPort: 50051
+              name: grpc
+              protocol: TCP

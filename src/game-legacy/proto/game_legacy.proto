@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package game_legacy;
+
+message GameLegacyRecord {
+  string record_id = 1;
+  string game_id = 2;
+  int64 timestamp = 3;
+  string data = 4;
+}
+
+message Empty {}
+
+message CreateGameLegacyRequest {
+  string game_id = 1;
+  string data = 2;
+}
+
+message FindAllRequest {
+  message Filters {
+    string game_id = 1;
+  }
+  Filters filters = 1;
+  uint64 limit = 2;
+  uint64 offset = 3;
+}
+
+message FindAllResponse {
+  uint64 total = 1;
+  uint64 limit = 2;
+  uint64 offset = 3;
+  repeated GameLegacyRecord results = 4;
+}
+
+message FindByIdRequest {
+  string record_id = 1;
+}
+
+message FindByIdResponse {
+  GameLegacyRecord record = 1;
+}
+
+service GameLegacy {
+  rpc Create (CreateGameLegacyRequest) returns (Empty);
+  rpc FindAll (FindAllRequest) returns (FindAllResponse);
+  rpc FindById (FindByIdRequest) returns (FindByIdResponse);
+}

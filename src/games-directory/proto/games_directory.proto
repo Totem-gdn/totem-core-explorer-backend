@@ -1,0 +1,97 @@
+syntax = "proto3";
+
+package games_directory;
+
+enum GameStatus {
+  PENDING = 0;
+  ACCEPTED = 1;
+  REJECTED = 2;
+  BANNED = 3;
+}
+
+message GameRecord {
+  string record_id = 1;
+  string owner = 2;
+  string name = 3;
+  string author = 4;
+  string renderer = 5;
+  string avatar_filter = 6;
+  string asset_filter = 7;
+  string gem_filter = 8;
+  string website = 9;
+  uint64 created_at = 10;
+  uint64 updated_at = 11;
+  GameStatus status = 12;
+}
+
+message Empty {}
+
+message CreateGameRequest {
+  string owner = 1;
+  string name = 2;
+  string author = 3;
+  string renderer = 4;
+  string avatar_filter = 5;
+  string asset_filter = 6;
+  string gem_filter = 7;
+  string website = 8;
+  GameStatus status = 9;
+}
+
+message UpdateGameOwnerRequest {
+  string record_id = 1;
+  string owner = 2;
+}
+
+message UpdateGameNameRequest {
+  string record_id = 1;
+  string name = 2;
+}
+
+message UpdateGameAuthorRequest {
+  string record_id = 1;
+  string author = 2;
+}
+
+message UpdateGameRendererRequest {
+  string record_id = 1;
+  string renderer = 2;
+}
+
+message UpdateGameAvatarFilterRequest {
+  string record_id = 1;
+  string avatar_filter = 2;
+}
+
+message UpdateGameAssetFilterRequest {
+  string record_id = 1;
+  string asset_filter = 2;
+}
+
+message UpdateGameGemFilterRequest {
+  string record_id = 1;
+  string gem_filter = 2;
+}
+
+message UpdateGameWebsiteRequest {
+  string record_id = 1;
+  string website = 2;
+}
+
+message UpdateGameStatusRequest {
+  string record_id = 1;
+  GameStatus status = 2;
+}
+
+service GamesDirectory {
+  rpc Create (CreateGameRequest) returns (Empty);
+  rpc UpdateGameOwner (UpdateGameOwnerRequest) returns (Empty);
+  rpc UpdateGameName (UpdateGameNameRequest) returns (Empty);
+  rpc UpdateGameAuthor (UpdateGameAuthorRequest) returns (Empty);
+  rpc UpdateGameRenderer (UpdateGameRendererRequest) returns (Empty);
+  rpc UpdateGameAvatarFilter (UpdateGameAvatarFilterRequest) returns (Empty);
+  rpc UpdateGameAssetFilter (UpdateGameAssetFilterRequest) returns (Empty);
+  rpc UpdateGameGemFilter (UpdateGameGemFilterRequest) returns (Empty);
+  rpc UpdateGameWebsite (UpdateGameWebsiteRequest) returns (Empty);
+  rpc UpdateGameStatus (UpdateGameStatusRequest) returns (Empty);
+}

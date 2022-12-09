@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package asset_legacy;
+
+enum AssetType {
+  AVATAR = 0;
+  ASSET = 1;
+  GEM = 2;
+}
+
+message AssetLegacyRecord {
+  string record_id = 1;
+  string player_address = 2;
+  string asset_id = 3;
+  string game_id = 4;
+  int64 timestamp = 5;
+  string data = 6;
+}
+
+message Empty {}
+
+message CreateAssetLegacyRequest {
+  AssetType asset_type = 1;
+  string player_address = 2;
+  string asset_id = 3;
+  string game_id = 4;
+  string data = 5;
+}
+
+message FindAllRequest {
+  message Filters {
+    string player_address = 1;
+    string asset_id = 2;
+    string game_id = 3;
+  }
+  AssetType asset_type = 1;
+  Filters filters = 2;
+  uint64 limit = 3;
+  uint64 offset = 4;
+}
+
+message FindAllResponse {
+  uint64 total = 1;
+  uint64 limit = 2;
+  uint64 offset = 3;
+  repeated AssetLegacyRecord results = 4;
+}
+
+message FindByIdRequest {
+  AssetType asset_type = 1;
+  string record_id = 2;
+}
+
+message FindByIdResponse {
+  AssetLegacyRecord record = 1;
+}
+
+service AssetLegacy {
+  rpc Create (CreateAssetLegacyRequest) returns (Empty);
+  rpc FindAll (FindAllRequest) returns (FindAllResponse);
+  rpc FindById (FindByIdRequest) returns (FindByIdResponse);
+}
