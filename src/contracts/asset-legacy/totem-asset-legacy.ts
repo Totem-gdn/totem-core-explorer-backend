@@ -93,7 +93,7 @@ export class TotemAssetLegacy implements OnApplicationBootstrap {
   }
 
   async create(assetType: AssetType, record: CreateAssetLegacy): Promise<string> {
-    const { maxFeePerGas, maxPriorityFeePerGas } = this.providerService.getGasPrices();
+    const { maxFeePerGas, maxPriorityFeePerGas } = await this.providerService.getProvider().getFeeData();
     const gasLimit = await this.contracts[assetType].estimateGas.create(
       record.playerAddress,
       BigNumber.from(record.assetId),
