@@ -71,7 +71,7 @@ export class AssetLegacyService {
       .find({ ...filters })
       .skip(offset)
       .limit(limit)
-      .sort({ _id: -1 })
+      .sort({ timestamp: -1 })
       .exec();
     return {
       total,
