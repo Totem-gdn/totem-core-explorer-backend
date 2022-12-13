@@ -9,6 +9,8 @@ import { GameStatus } from '../../../utils/enums';
   timestamps: false,
 })
 export class GamesDirectory {
+  _id: string;
+
   @Prop({ type: SchemaTypes.String, required: true, index: true, unique: true })
   recordId: string;
 

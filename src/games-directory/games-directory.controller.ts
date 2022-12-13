@@ -3,7 +3,7 @@ import { GrpcMethod } from '@nestjs/microservices';
 
 import { UnhandledExceptionFilter } from '../utils/filters';
 import { RpcValidationPipe } from '../utils/pipes';
-import { CreateGameRequest, Empty } from './games-directory.interface';
+import { CreateGameRequest, CreateGameResponse } from './games-directory.interface';
 import { GamesDirectoryService } from '../repository/games-directory';
 import { TotemGamesDirectory } from '../contracts/games-directory/totem-games-directory';
 
@@ -14,9 +14,9 @@ export class GamesDirectoryController {
   @UseFilters(UnhandledExceptionFilter)
   @UsePipes(new RpcValidationPipe(true))
   @GrpcMethod('GamesDirectory', 'Create')
-  async create(request: CreateGameRequest): Promise<Empty> {
+  async create(request: CreateGameRequest): Promise<CreateGameResponse> {
     const { owner, status, ...game } = request;
-    await this.contract.create({ owner, game, status });
-    return {};
+    const txHash = await this.contract.create({ owner, game, status });
+    return { txHash };
   }
 }

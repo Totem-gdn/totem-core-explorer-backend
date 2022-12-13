@@ -12,14 +12,16 @@ export interface AssetLegacyRecord {
   data: string;
 }
 
-export type Empty = Record<string, never>;
-
 export interface CreateAssetLegacyRequest {
   assetType: AssetType;
   playerAddress: string;
   assetId: string;
   gameId: string;
   data: string;
+}
+
+export interface CreateAssetLegacyResponse {
+  txHash: string;
 }
 
 export interface FindAllRequest {
@@ -50,7 +52,7 @@ export interface FindByIdResponse {
 }
 
 export interface AssetLegacy {
-  Create(request: CreateAssetLegacyRequest): Observable<Empty>;
+  Create(request: CreateAssetLegacyRequest): Observable<CreateAssetLegacyResponse>;
 
   FindAll(request: FindAllRequest): Observable<FindAllResponse>;
 

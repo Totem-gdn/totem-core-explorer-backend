@@ -38,6 +38,10 @@ message CreateGameRequest {
   GameStatus status = 9;
 }
 
+message CreateGameResponse {
+  string tx_hash = 1;
+}
+
 message UpdateGameOwnerRequest {
   string record_id = 1;
   string owner = 2;
@@ -84,7 +88,7 @@ message UpdateGameStatusRequest {
 }
 
 service GamesDirectory {
-  rpc Create (CreateGameRequest) returns (Empty);
+  rpc Create (CreateGameRequest) returns (CreateGameResponse);
   rpc UpdateGameOwner (UpdateGameOwnerRequest) returns (Empty);
   rpc UpdateGameName (UpdateGameNameRequest) returns (Empty);
   rpc UpdateGameAuthor (UpdateGameAuthorRequest) returns (Empty);

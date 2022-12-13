@@ -6,7 +6,7 @@ import { UnhandledExceptionFilter } from '../utils/filters';
 import { RpcValidationPipe } from '../utils/pipes';
 import {
   CreateGameLegacyRequest,
-  Empty,
+  CreateGameLegacyResponse,
   FindAllRequest,
   FindAllResponse,
   FindByIdRequest,
@@ -22,9 +22,9 @@ export class GameLegacyController {
   @UseFilters(UnhandledExceptionFilter)
   @UsePipes(new RpcValidationPipe(true))
   @GrpcMethod('GameLegacy', 'Create')
-  async create(request: CreateGameLegacyRequest): Promise<Empty> {
-    await this.contract.create(request);
-    return {};
+  async create(request: CreateGameLegacyRequest): Promise<CreateGameLegacyResponse> {
+    const txHash = await this.contract.create(request);
+    return { txHash };
   }
 
   @UseFilters(UnhandledExceptionFilter)

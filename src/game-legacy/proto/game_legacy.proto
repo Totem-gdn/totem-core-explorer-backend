@@ -9,11 +9,13 @@ message GameLegacyRecord {
   string data = 4;
 }
 
-message Empty {}
-
 message CreateGameLegacyRequest {
   string game_id = 1;
   string data = 2;
+}
+
+message CreateGameLegacyResponse {
+  string tx_hash = 1;
 }
 
 message FindAllRequest {
@@ -41,7 +43,7 @@ message FindByIdResponse {
 }
 
 service GameLegacy {
-  rpc Create (CreateGameLegacyRequest) returns (Empty);
+  rpc Create (CreateGameLegacyRequest) returns (CreateGameLegacyResponse);
   rpc FindAll (FindAllRequest) returns (FindAllResponse);
   rpc FindById (FindByIdRequest) returns (FindByIdResponse);
 }

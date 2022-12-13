@@ -74,14 +74,15 @@ export class TotemGamesDirectory implements OnApplicationBootstrap {
     }
   }
 
-  async create(record: CreateGameRecord) {
-    const { maxFee, maxPriorityFee } = this.providerService.getStandardGasPrice();
+  async create(record: CreateGameRecord): Promise<string> {
+    const { maxFeePerGas, maxPriorityFeePerGas } = this.providerService.getGasPrices();
     const gasLimit = await this.contract.estimateGas.create(record.owner, record.game, record.status);
     const tx = await this.contract.create(record.owner, record.game, record.status, {
       gasLimit,
-      maxFee,
-      maxPriorityFee,
+      maxFeePerGas,
+      maxPriorityFeePerGas,
     });
-    await this.providerService.getProvider().waitForTransaction(tx.hash);
+    await tx.wait();
+    return tx.hash;
   }
 }

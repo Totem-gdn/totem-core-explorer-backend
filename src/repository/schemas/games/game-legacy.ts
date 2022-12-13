@@ -8,8 +8,8 @@ import { Document, SchemaTypes } from 'mongoose';
   timestamps: false,
 })
 export class GameLegacy {
-  @Prop({ type: SchemaTypes.String, required: true, index: true, unique: true })
-  recordId: string;
+  @Prop({ type: SchemaTypes.String })
+  _id: string;
 
   @Prop({ type: SchemaTypes.String, required: true, index: true })
   gameId: string;

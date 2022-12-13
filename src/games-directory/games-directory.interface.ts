@@ -32,6 +32,10 @@ export interface CreateGameRequest {
   status: GameStatus;
 }
 
+export interface CreateGameResponse {
+  txHash: string;
+}
+
 export interface UpdateGameOwnerRequest {
   recordId: string;
   owner: string;
@@ -78,7 +82,7 @@ export interface UpdateGameStatusRequest {
 }
 
 export interface GamesDirectory {
-  Create(request: CreateGameRequest): Observable<Empty>;
+  Create(request: CreateGameRequest): Observable<CreateGameResponse>;
 
   UpdateGameOwner(request: UpdateGameOwnerRequest): Observable<Empty>;
 

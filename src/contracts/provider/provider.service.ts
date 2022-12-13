@@ -1,42 +1,7 @@
 import { Injectable, Logger, OnApplicationBootstrap, OnApplicationShutdown } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { BigNumber, providers, utils, Wallet } from 'ethers';
-
-type GasStationPrices = {
-  safeLow: {
-    maxPriorityFee: BigNumber;
-    maxFee: BigNumber;
-  };
-  standard: {
-    maxPriorityFee: BigNumber;
-    maxFee: BigNumber;
-  };
-  fast: {
-    maxPriorityFee: BigNumber;
-    maxFee: BigNumber;
-  };
-  estimatedBaseFee: BigNumber;
-  blockTime: number;
-  blockNumber: number;
-};
-
-type GasStationPricesResponse = {
-  safeLow: {
-    maxPriorityFee: number;
-    maxFee: number;
-  };
-  standard: {
-    maxPriorityFee: number;
-    maxFee: number;
-  };
-  fast: {
-    maxPriorityFee: number;
-    maxFee: number;
-  };
-  estimatedBaseFee: number;
-  blockTime: number;
-  blockNumber: number;
-};
+import { providers, utils, Wallet } from 'ethers';
+import { GasStationPrices, GasStationPricesResponse } from './provider.interface';
 
 @Injectable()
 export class ProviderService implements OnApplicationBootstrap, OnApplicationShutdown {
@@ -44,8 +9,9 @@ export class ProviderService implements OnApplicationBootstrap, OnApplicationShu
   private wallet: Wallet;
   private provider: providers.JsonRpcProvider;
   private intervalId: NodeJS.Timer;
+  private abortController: AbortController;
   private gasStationUrl = '';
-  private prices: GasStationPrices;
+  private gasStationPrices: GasStationPrices;
 
   constructor(private config: ConfigService) {}
 
@@ -63,59 +29,52 @@ export class ProviderService implements OnApplicationBootstrap, OnApplicationShu
       default:
         throw new Error(`invalid provider network: name ${network.name}, chainId ${network.chainId}`);
     }
-    await this.fetchGasPrice();
-    this.intervalId = setInterval(() => this.fetchGasPrice(), this.prices.blockTime * 1000);
+    await this.fetchGasPrice(true);
+    this.intervalId = setInterval(() => {
+      this.abortController.abort();
+      this.fetchGasPrice();
+    }, 5 * 1000); // default block time is 5 sec
   }
 
   async onApplicationShutdown() {
     clearInterval(this.intervalId);
   }
 
-  async fetchGasPrice() {
+  async fetchGasPrice(rethrow = false) {
     try {
-      const response = await fetch(this.gasStationUrl);
-      const { blockNumber, blockTime, estimatedBaseFee, safeLow, standard, fast }: GasStationPricesResponse =
-        await response.json();
-      this.prices = {
-        blockNumber,
-        blockTime,
-        estimatedBaseFee: utils.parseUnits(estimatedBaseFee.toString(10), 'gwei'),
-        safeLow: {
-          maxFee: utils.parseUnits(Math.ceil(safeLow.maxFee).toString(10), 'gwei'),
-          maxPriorityFee: utils.parseUnits(Math.ceil(safeLow.maxPriorityFee).toString(10), 'gwei'),
-        },
-        standard: {
-          maxFee: utils.parseUnits(Math.ceil(standard.maxFee).toString(10), 'gwei'),
-          maxPriorityFee: utils.parseUnits(Math.ceil(standard.maxPriorityFee).toString(10), 'gwei'),
-        },
-        fast: {
-          maxFee: utils.parseUnits(Math.ceil(fast.maxFee).toString(10), 'gwei'),
-          maxPriorityFee: utils.parseUnits(Math.ceil(fast.maxPriorityFee).toString(10), 'gwei'),
-        },
-      };
+      if (this.abortController) {
+        this.abortController.abort();
+      }
+      const abortController = new AbortController();
+      this.abortController = abortController;
+      const response = await fetch(this.gasStationUrl, { signal: this.abortController.signal });
+      if (!abortController.signal.aborted) {
+        const { blockNumber, blockTime, estimatedBaseFee, fast }: GasStationPricesResponse = await response.json();
+        this.gasStationPrices = {
+          blockNumber,
+          blockTime,
+          estimatedBaseFee: utils.parseUnits(estimatedBaseFee.toFixed(9), 'gwei'),
+          maxFeePerGas: utils.parseUnits(Math.ceil(fast.maxFee).toString(10), 'gwei').mul(2),
+          maxPriorityFeePerGas: utils.parseUnits(Math.ceil(fast.maxPriorityFee).toString(10), 'gwei'),
+        };
+      }
     } catch (ex) {
-      if (ex instanceof Error) {
+      if (ex instanceof DOMException) {
+        // AbortError https://github.com/nodejs/node/issues/38361
+        this.logger.warn(`fetch gas prices request aborted`);
+      } else if (ex instanceof Error) {
         this.logger.error(ex.message, ex.stack);
       } else {
         this.logger.error(ex);
+      }
+      if (rethrow) {
+        throw ex;
       }
     }
   }
 
   getGasPrices() {
-    return this.prices;
-  }
-
-  getStandardGasPrice() {
-    return this.prices.standard;
-  }
-
-  getSlowGasPrice() {
-    return this.prices.safeLow;
-  }
-
-  getFastGasPrice() {
-    return this.prices.fast;
+    return this.gasStationPrices;
   }
 
   getWallet() {

@@ -11,8 +11,16 @@ import { AssetLegacyService } from '../../repository/asset-legacy';
 @Injectable()
 export class TotemAssetLegacy implements OnApplicationBootstrap {
   private logger = new Logger(TotemAssetLegacy.name);
-  private contracts: Record<AssetType, Contract>;
-  private symbols: Record<AssetType, string>;
+  private contracts: Record<AssetType, Contract | null> = {
+    [AssetType.AVATAR]: null,
+    [AssetType.ASSET]: null,
+    [AssetType.GEM]: null,
+  };
+  private symbols: Record<AssetType, string | null> = {
+    [AssetType.AVATAR]: null,
+    [AssetType.ASSET]: null,
+    [AssetType.GEM]: null,
+  };
 
   constructor(
     private config: ConfigService,
@@ -84,8 +92,8 @@ export class TotemAssetLegacy implements OnApplicationBootstrap {
     }
   }
 
-  async create(assetType: AssetType, record: CreateAssetLegacy) {
-    const { maxFee, maxPriorityFee } = this.providerService.getStandardGasPrice();
+  async create(assetType: AssetType, record: CreateAssetLegacy): Promise<string> {
+    const { maxFeePerGas, maxPriorityFeePerGas } = this.providerService.getGasPrices();
     const gasLimit = await this.contracts[assetType].estimateGas.create(
       record.playerAddress,
       BigNumber.from(record.assetId),
@@ -97,8 +105,9 @@ export class TotemAssetLegacy implements OnApplicationBootstrap {
       BigNumber.from(record.assetId),
       BigNumber.from(record.gameId),
       record.data,
-      { gasLimit, maxFee, maxPriorityFee },
+      { gasLimit, maxFeePerGas, maxPriorityFeePerGas },
     );
-    await this.providerService.getProvider().waitForTransaction(tx.hash);
+    await tx.wait();
+    return tx.hash;
   }
 }

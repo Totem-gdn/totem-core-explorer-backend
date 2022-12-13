@@ -8,11 +8,13 @@ export interface GameLegacyRecord {
   data: string;
 }
 
-export type Empty = Record<string, never>;
-
 export interface CreateGameLegacyRequest {
   gameId: string;
   data: string;
+}
+
+export interface CreateGameLegacyResponse {
+  txHash: string;
 }
 
 export interface FindAllRequest {
@@ -39,7 +41,7 @@ export interface FindByIdResponse {
 }
 
 export interface GameLegacy {
-  Create(request: CreateGameLegacyRequest): Observable<Empty>;
+  Create(request: CreateGameLegacyRequest): Observable<CreateGameLegacyResponse>;
 
   FindAll(request: FindAllRequest): Observable<FindAllResponse>;
 

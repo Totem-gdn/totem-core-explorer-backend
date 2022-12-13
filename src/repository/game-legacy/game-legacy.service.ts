@@ -1,25 +1,23 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { GameLegacy, GameLegacyDocument } from '../schemas';
 import {
-  GameLegacyRecord,
   CreateGameLegacy,
   FindAllQuery,
   FindAllResult,
   FindByRecordId,
+  GameLegacyRecord,
 } from './game-legacy.interface';
 
 @Injectable()
 export class GameLegacyService {
-  private logger = new Logger(GameLegacyService.name);
-
   constructor(@InjectModel(GameLegacy.name) private model: Model<GameLegacyDocument>) {}
 
   private docToRecord(doc: GameLegacyDocument): GameLegacyRecord {
     return {
-      recordId: doc.recordId,
+      recordId: doc._id,
       gameId: doc.gameId,
       timestamp: doc.timestamp,
       data: doc.data,
@@ -27,28 +25,35 @@ export class GameLegacyService {
   }
 
   async create(request: CreateGameLegacy) {
-    await this.model.create({ ...request });
+    const { recordId, ...record } = request;
+    await this.model.create({ _id: recordId, ...record });
   }
 
   async findAll(request: FindAllQuery): Promise<FindAllResult> {
-    const { filters, offset, limit } = request;
+    const { offset, limit } = request;
+    const filters = Object.entries(request.filters).reduce((acc, [key, val]) => {
+      if (val !== '' && val !== null && val !== undefined) {
+        acc[key] = val;
+      }
+      return acc;
+    }, {});
     const total = await this.model.countDocuments({ ...filters }).exec();
     const results = await this.model
       .find({ ...filters })
       .skip(offset)
       .limit(limit)
-      .sort({ recordId: -1 })
+      .sort({ _id: -1 })
       .exec();
     return {
       total,
       limit,
       offset,
-      results: results.map(this.docToRecord),
+      results: results?.length > 0 ? results.map(this.docToRecord) : [],
     };
   }
 
   async findById({ recordId }: FindByRecordId): Promise<GameLegacyRecord> {
-    const record = await this.model.findOne({ recordId }).exec();
+    const record = await this.model.findById(recordId).exec();
     return this.docToRecord(record);
   }
 }

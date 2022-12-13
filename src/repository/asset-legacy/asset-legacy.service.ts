@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -21,15 +21,13 @@ import { AssetType } from '../../utils/enums';
 
 @Injectable()
 export class AssetLegacyService {
-  private logger = new Logger(AssetLegacyService.name);
-
   constructor(
     @InjectModel(AvatarLegacy.name) private avatarLegacyModel: Model<AvatarLegacyDocument>,
     @InjectModel(AssetLegacy.name) private assetLegacyModel: Model<AssetLegacyDocument>,
     @InjectModel(GemLegacy.name) private gemLegacyModel: Model<GemLegacyDocument>,
   ) {}
 
-  private getModel(assetType: AssetType) {
+  private getModel(assetType: AssetType): Model<AvatarLegacyDocument | AssetLegacyDocument | GemLegacyDocument> {
     switch (assetType) {
       case AssetType.AVATAR:
         return this.avatarLegacyModel;
@@ -54,26 +52,32 @@ export class AssetLegacyService {
   }
 
   async create(request: CreateAssetLegacy) {
-    const { assetType, ...record } = request;
+    const { assetType, recordId, ...record } = request;
     const model = this.getModel(assetType);
-    await model.create(record);
+    await model.create({ _id: recordId, ...record });
   }
 
   async findAll(request: FindAllQuery): Promise<FindAllResult> {
-    const { assetType, filters, offset, limit } = request;
+    const { assetType, offset, limit } = request;
+    const filters = Object.entries(request.filters).reduce((acc, [key, val]) => {
+      if (val !== '' && val !== null && val !== undefined) {
+        acc[key] = val;
+      }
+      return acc;
+    }, {});
     const model = this.getModel(assetType);
     const total = await model.countDocuments({ ...filters }).exec();
     const results = await model
       .find({ ...filters })
       .skip(offset)
       .limit(limit)
-      .sort({ recordId: -1 })
+      .sort({ _id: -1 })
       .exec();
     return {
       total,
       limit,
       offset,
-      results: results.map(this.docToRecord),
+      results: results.length > 0 ? results.map(this.docToRecord) : [],
     };
   }
 

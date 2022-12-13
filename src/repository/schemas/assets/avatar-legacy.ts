@@ -1,5 +1,5 @@
-import { Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, SchemaTypes } from 'mongoose';
 
 import { LegacyRecord } from '../common/legacy-record';
 
@@ -9,7 +9,10 @@ import { LegacyRecord } from '../common/legacy-record';
   _id: false,
   timestamps: false,
 })
-export class AvatarLegacy extends LegacyRecord {}
+export class AvatarLegacy extends LegacyRecord {
+  @Prop({ type: SchemaTypes.String })
+  _id: string;
+}
 
 export type AvatarLegacyDocument = AvatarLegacy & Document;
 

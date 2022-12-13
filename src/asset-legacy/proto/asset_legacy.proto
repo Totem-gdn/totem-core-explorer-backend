@@ -17,14 +17,16 @@ message AssetLegacyRecord {
   string data = 6;
 }
 
-message Empty {}
-
 message CreateAssetLegacyRequest {
   AssetType asset_type = 1;
   string player_address = 2;
   string asset_id = 3;
   string game_id = 4;
   string data = 5;
+}
+
+message CreateAssetLegacyResponse {
+  string tx_hash = 1;
 }
 
 message FindAllRequest {
@@ -56,7 +58,7 @@ message FindByIdResponse {
 }
 
 service AssetLegacy {
-  rpc Create (CreateAssetLegacyRequest) returns (Empty);
+  rpc Create (CreateAssetLegacyRequest) returns (CreateAssetLegacyResponse);
   rpc FindAll (FindAllRequest) returns (FindAllResponse);
   rpc FindById (FindByIdRequest) returns (FindByIdResponse);
 }
