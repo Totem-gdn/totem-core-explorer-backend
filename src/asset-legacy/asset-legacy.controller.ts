@@ -6,7 +6,7 @@ import { UnhandledExceptionFilter } from '../utils/filters';
 import { RpcValidationPipe } from '../utils/pipes';
 import {
   CreateAssetLegacyRequest,
-  Empty,
+  CreateAssetLegacyResponse,
   FindAllRequest,
   FindAllResponse,
   FindByIdRequest,
@@ -22,10 +22,10 @@ export class AssetLegacyController {
   @UseFilters(UnhandledExceptionFilter)
   @UsePipes(new RpcValidationPipe(true))
   @GrpcMethod('AssetLegacy', 'Create')
-  async create(request: CreateAssetLegacyRequest): Promise<Empty> {
+  async create(request: CreateAssetLegacyRequest): Promise<CreateAssetLegacyResponse> {
     const { assetType, ...record } = request;
-    await this.contract.create(assetType, record);
-    return {};
+    const txHash = await this.contract.create(assetType, record);
+    return { txHash };
   }
 
   @UseFilters(UnhandledExceptionFilter)

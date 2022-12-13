@@ -31,6 +31,8 @@ export class TotemGameLegacy implements OnApplicationBootstrap {
     }
     this.contract = new Contract(address, TotemGameLegacyABI, this.providerService.getWallet());
     this.symbol = await this.contract.symbol();
+    // await this.fetchPreviousEvents();
+
     this.contract.on(
       this.contract.filters.GameLegacyRecord(),
       (gameId: BigNumber, recordId: BigNumber, event: Event) => {
@@ -67,14 +69,15 @@ export class TotemGameLegacy implements OnApplicationBootstrap {
     }
   }
 
-  async create(record: CreateGameLegacy) {
-    const { maxFee, maxPriorityFee } = this.providerService.getStandardGasPrice();
+  async create(record: CreateGameLegacy): Promise<string> {
+    const { maxFeePerGas, maxPriorityFeePerGas } = this.providerService.getGasPrices();
     const gasLimit = await this.contract.estimateGas.create(BigNumber.from(record.gameId), record.data);
     const tx = await this.contract.create(BigNumber.from(record.gameId), record.data, {
       gasLimit,
-      maxFee,
-      maxPriorityFee,
+      maxFeePerGas,
+      maxPriorityFeePerGas,
     });
-    await this.providerService.getProvider().waitForTransaction(tx.hash);
+    await tx.wait();
+    return tx.hash;
   }
 }

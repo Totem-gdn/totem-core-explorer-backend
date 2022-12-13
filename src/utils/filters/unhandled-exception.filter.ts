@@ -29,7 +29,7 @@ export class UnhandledExceptionFilter implements RpcExceptionFilter {
       );
     }
     if (exception instanceof Error) {
-      this.logger.error(`${Error.name}: ${JSON.stringify(exception)}`);
+      this.logger.error(`${Error.name}: ${JSON.stringify(exception)}`, exception.stack);
       return throwError(
         () =>
           new RpcException(
