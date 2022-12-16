@@ -7,7 +7,7 @@ export interface CreateGameRecord {
   author: string;
   renderer: string;
   avatarFilter: string;
-  assetFilter: string;
+  itemFilter: string;
   gemFilter: string;
   website: string;
   createdAt: number;
@@ -22,7 +22,7 @@ export interface GameRecord {
   author: string;
   renderer: string;
   avatarFilter: string;
-  assetFilter: string;
+  itemFilter: string;
   gemFilter: string;
   website: string;
   createdAt: number;

@@ -16,7 +16,7 @@ message GameRecord {
   string author = 4;
   string renderer = 5;
   string avatar_filter = 6;
-  string asset_filter = 7;
+  string item_filter = 7;
   string gem_filter = 8;
   string website = 9;
   uint64 created_at = 10;
@@ -32,7 +32,7 @@ message CreateGameRequest {
   string author = 3;
   string renderer = 4;
   string avatar_filter = 5;
-  string asset_filter = 6;
+  string item_filter = 6;
   string gem_filter = 7;
   string website = 8;
   GameStatus status = 9;
@@ -67,9 +67,9 @@ message UpdateGameAvatarFilterRequest {
   string avatar_filter = 2;
 }
 
-message UpdateGameAssetFilterRequest {
+message UpdateGameItemFilterRequest {
   string record_id = 1;
-  string asset_filter = 2;
+  string item_filter = 2;
 }
 
 message UpdateGameGemFilterRequest {
@@ -94,7 +94,7 @@ service GamesDirectory {
   rpc UpdateGameAuthor (UpdateGameAuthorRequest) returns (Empty);
   rpc UpdateGameRenderer (UpdateGameRendererRequest) returns (Empty);
   rpc UpdateGameAvatarFilter (UpdateGameAvatarFilterRequest) returns (Empty);
-  rpc UpdateGameAssetFilter (UpdateGameAssetFilterRequest) returns (Empty);
+  rpc UpdateGameItemFilter (UpdateGameItemFilterRequest) returns (Empty);
   rpc UpdateGameGemFilter (UpdateGameGemFilterRequest) returns (Empty);
   rpc UpdateGameWebsite (UpdateGameWebsiteRequest) returns (Empty);
   rpc UpdateGameStatus (UpdateGameStatusRequest) returns (Empty);
