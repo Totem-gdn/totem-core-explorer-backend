@@ -37,3 +37,6 @@ lerna-debug.log*
 # Environment
 .env*
 !.env.sample
+
+# RDS certs
+rds-combined-ca-bundle.pem
