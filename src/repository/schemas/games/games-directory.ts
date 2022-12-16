@@ -30,7 +30,7 @@ export class GamesDirectory {
   avatarFilter: string;
 
   @Prop({ type: SchemaTypes.String, required: true })
-  assetFilter: string;
+  itemFilter: string;
 
   @Prop({ type: SchemaTypes.String, required: true })
   gemFilter: string;

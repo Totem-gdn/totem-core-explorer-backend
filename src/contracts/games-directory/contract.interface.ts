@@ -8,7 +8,7 @@ export interface GameRecord {
     author: string;
     renderer: string;
     avatarFilter: string;
-    assetFilter: string;
+    itemFilter: string;
     gemFilter: string;
     website: string;
     createdAt: BigNumber;
@@ -24,7 +24,7 @@ export interface CreateGameRecord {
     author: string;
     renderer: string;
     avatarFilter: string;
-    assetFilter: string;
+    itemFilter: string;
     gemFilter: string;
     website: string;
   };

@@ -51,7 +51,7 @@ export class TotemGamesDirectory implements OnApplicationBootstrap {
         author: game.author,
         renderer: game.renderer,
         avatarFilter: game.avatarFilter,
-        assetFilter: game.assetFilter,
+        itemFilter: game.itemFilter,
         gemFilter: game.gemFilter,
         website: game.website,
         createdAt: game.createdAt.toNumber(),

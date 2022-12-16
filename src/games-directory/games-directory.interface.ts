@@ -10,7 +10,7 @@ export interface GameRecord {
   author: string;
   renderer: string;
   avatarFilter: string;
-  assetFilter: string;
+  itemFilter: string;
   gemFilter: string;
   website: string;
   createdAt: Long;
@@ -26,7 +26,7 @@ export interface CreateGameRequest {
   author: string;
   renderer: string;
   avatarFilter: string;
-  assetFilter: string;
+  itemFilter: string;
   gemFilter: string;
   website: string;
   status: GameStatus;
@@ -58,17 +58,17 @@ export interface UpdateGameRendererRequest {
 
 export interface UpdateGameAvatarFilterRequest {
   recordId: string;
-  avatar_filter: string;
+  avatarFilter: string;
 }
 
-export interface UpdateGameAssetFilterRequest {
+export interface UpdateGameItemFilterRequest {
   recordId: string;
-  asset_filter: string;
+  itemFilter: string;
 }
 
 export interface UpdateGameGemFilterRequest {
   recordId: string;
-  gem_filter: string;
+  gemFilter: string;
 }
 
 export interface UpdateGameWebsiteRequest {
@@ -94,7 +94,7 @@ export interface GamesDirectory {
 
   UpdateGameAvatarFilter(request: UpdateGameAvatarFilterRequest): Observable<Empty>;
 
-  UpdateGameAssetFilter(request: UpdateGameAssetFilterRequest): Observable<Empty>;
+  UpdateGameItemFilter(request: UpdateGameItemFilterRequest): Observable<Empty>;
 
   UpdateGameGemFilter(request: UpdateGameGemFilterRequest): Observable<Empty>;
 
