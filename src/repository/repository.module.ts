@@ -3,8 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import {
-  AssetLegacy,
-  AssetLegacySchema,
+  ItemLegacy,
+  ItemLegacySchema,
   AvatarLegacy,
   AvatarLegacySchema,
   GameLegacy,
@@ -23,7 +23,7 @@ import { GamesDirectoryService } from './games-directory';
     ConfigModule,
     MongooseModule.forFeature([
       { name: AvatarLegacy.name, schema: AvatarLegacySchema },
-      { name: AssetLegacy.name, schema: AssetLegacySchema },
+      { name: ItemLegacy.name, schema: ItemLegacySchema },
       { name: GemLegacy.name, schema: GemLegacySchema },
       { name: GameLegacy.name, schema: GameLegacySchema },
       { name: GamesDirectory.name, schema: GamesDirectorySchema },

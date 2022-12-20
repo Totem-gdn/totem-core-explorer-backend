@@ -1,5 +1,5 @@
 export enum AssetType {
   AVATAR = 0,
-  ASSET = 1,
+  ITEM = 1,
   GEM = 2,
 }

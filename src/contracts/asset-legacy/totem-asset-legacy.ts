@@ -13,12 +13,12 @@ export class TotemAssetLegacy implements OnApplicationBootstrap {
   private logger = new Logger(TotemAssetLegacy.name);
   private contracts: Record<AssetType, Contract | null> = {
     [AssetType.AVATAR]: null,
-    [AssetType.ASSET]: null,
+    [AssetType.ITEM]: null,
     [AssetType.GEM]: null,
   };
   private symbols: Record<AssetType, string | null> = {
     [AssetType.AVATAR]: null,
-    [AssetType.ASSET]: null,
+    [AssetType.ITEM]: null,
     [AssetType.GEM]: null,
   };
 
@@ -30,7 +30,7 @@ export class TotemAssetLegacy implements OnApplicationBootstrap {
 
   async onApplicationBootstrap() {
     await this.initContract(AssetType.AVATAR, 'AVATAR_LEGACY_CONTRACT');
-    await this.initContract(AssetType.ASSET, 'ASSET_LEGACY_CONTRACT');
+    await this.initContract(AssetType.ITEM, 'ITEM_LEGACY_CONTRACT');
     await this.initContract(AssetType.GEM, 'GEM_LEGACY_CONTRACT');
   }
 

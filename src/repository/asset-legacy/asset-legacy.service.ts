@@ -3,8 +3,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import {
-  AssetLegacy,
-  AssetLegacyDocument,
+  ItemLegacy,
+  ItemLegacyDocument,
   AvatarLegacy,
   AvatarLegacyDocument,
   GemLegacy,
@@ -23,15 +23,15 @@ import { AssetType } from '../../utils/enums';
 export class AssetLegacyService {
   constructor(
     @InjectModel(AvatarLegacy.name) private avatarLegacyModel: Model<AvatarLegacyDocument>,
-    @InjectModel(AssetLegacy.name) private assetLegacyModel: Model<AssetLegacyDocument>,
+    @InjectModel(ItemLegacy.name) private assetLegacyModel: Model<ItemLegacyDocument>,
     @InjectModel(GemLegacy.name) private gemLegacyModel: Model<GemLegacyDocument>,
   ) {}
 
-  private getModel(assetType: AssetType): Model<AvatarLegacyDocument | AssetLegacyDocument | GemLegacyDocument> {
+  private getModel(assetType: AssetType): Model<AvatarLegacyDocument | ItemLegacyDocument | GemLegacyDocument> {
     switch (assetType) {
       case AssetType.AVATAR:
         return this.avatarLegacyModel;
-      case AssetType.ASSET:
+      case AssetType.ITEM:
         return this.assetLegacyModel;
       case AssetType.GEM:
         return this.gemLegacyModel;
@@ -40,9 +40,9 @@ export class AssetLegacyService {
     }
   }
 
-  private docToRecord(doc: AvatarLegacyDocument | AssetLegacyDocument | GemLegacyDocument): AssetLegacyRecord {
+  private docToRecord(doc: AvatarLegacyDocument | ItemLegacyDocument | GemLegacyDocument): AssetLegacyRecord {
     return {
-      recordId: doc.recordId,
+      recordId: doc._id,
       playerAddress: doc.playerAddress,
       assetId: doc.assetId,
       gameId: doc.gameId,
