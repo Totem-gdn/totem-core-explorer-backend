@@ -2,6 +2,7 @@ import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { BigNumber, Contract, Event } from 'ethers';
 
+import { withRetry } from '../../utils/helpers';
 import * as TotemGamesDirectoryABI from '../abi/TotemGamesDirectory.json';
 import { CreateGameRecord, GameRecord } from './contract.interface';
 import { ProviderService } from '../provider/provider.service';
@@ -75,14 +76,16 @@ export class TotemGamesDirectory implements OnApplicationBootstrap {
   }
 
   async create(record: CreateGameRecord): Promise<string> {
-    const { maxFeePerGas, maxPriorityFeePerGas } = await this.providerService.getProvider().getFeeData();
     const gasLimit = await this.contract.estimateGas.create(record.owner, record.game, record.status);
-    const tx = await this.contract.create(record.owner, record.game, record.status, {
-      gasLimit,
-      maxFeePerGas,
-      maxPriorityFeePerGas,
+    return await withRetry(`[${this.symbol}] GameName: ${record.game.name}`, async () => {
+      const { maxFeePerGas, maxPriorityFeePerGas } = await this.providerService.getProvider().getFeeData();
+      const tx = await this.contract.create(record.owner, record.game, record.status, {
+        gasLimit,
+        maxFeePerGas,
+        maxPriorityFeePerGas,
+      });
+      await tx.wait();
+      return tx.hash;
     });
-    await tx.wait();
-    return tx.hash;
   }
 }

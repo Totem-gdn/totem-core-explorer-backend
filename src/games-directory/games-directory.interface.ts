@@ -18,8 +18,6 @@ export interface GameRecord {
   status: GameStatus;
 }
 
-export type Empty = Record<string, never>;
-
 export interface CreateGameRequest {
   owner: string;
   name: string;
@@ -36,69 +34,52 @@ export interface CreateGameResponse {
   txHash: string;
 }
 
-export interface UpdateGameOwnerRequest {
+export interface UpdateGameRequest {
   recordId: string;
-  owner: string;
+  owner?: string;
+  name?: string;
+  author?: string;
+  renderer?: string;
+  avatarFilter?: string;
+  itemFilter?: string;
+  gemFilter?: string;
+  website?: string;
+  status?: GameStatus;
 }
 
-export interface UpdateGameNameRequest {
-  recordId: string;
-  name: string;
+export interface UpdateGameResponse {
+  txHash: string;
 }
 
-export interface UpdateGameAuthorRequest {
-  recordId: string;
-  author: string;
+export interface FindAllRequest {
+  filters: {
+    owner: string;
+  };
+  limit: Long;
+  offset: Long;
 }
 
-export interface UpdateGameRendererRequest {
-  recordId: string;
-  renderer: string;
+export interface FindAllResponse {
+  total: Long;
+  limit: Long;
+  offset: Long;
+  results: GameRecord[];
 }
 
-export interface UpdateGameAvatarFilterRequest {
+export interface FindByIdRequest {
   recordId: string;
-  avatarFilter: string;
 }
 
-export interface UpdateGameItemFilterRequest {
-  recordId: string;
-  itemFilter: string;
-}
-
-export interface UpdateGameGemFilterRequest {
-  recordId: string;
-  gemFilter: string;
-}
-
-export interface UpdateGameWebsiteRequest {
-  recordId: string;
-  website: string;
-}
-
-export interface UpdateGameStatusRequest {
-  recordId: string;
-  status: GameStatus;
+export interface FindByIdResponse {
+  record: GameRecord;
 }
 
 export interface GamesDirectory {
   Create(request: CreateGameRequest): Observable<CreateGameResponse>;
 
-  UpdateGameOwner(request: UpdateGameOwnerRequest): Observable<Empty>;
+  Update(request: UpdateGameRequest): Observable<UpdateGameResponse>;
 
-  UpdateGameName(request: UpdateGameNameRequest): Observable<Empty>;
+  FindAll(request: FindAllRequest): Observable<FindAllResponse>;
 
-  UpdateGameAuthor(request: UpdateGameAuthorRequest): Observable<Empty>;
-
-  UpdateGameRenderer(request: UpdateGameRendererRequest): Observable<Empty>;
-
-  UpdateGameAvatarFilter(request: UpdateGameAvatarFilterRequest): Observable<Empty>;
-
-  UpdateGameItemFilter(request: UpdateGameItemFilterRequest): Observable<Empty>;
-
-  UpdateGameGemFilter(request: UpdateGameGemFilterRequest): Observable<Empty>;
-
-  UpdateGameWebsite(request: UpdateGameWebsiteRequest): Observable<Empty>;
-
-  UpdateGameStatus(request: UpdateGameStatusRequest): Observable<Empty>;
+  FindById(request: FindByIdRequest): Observable<FindByIdResponse>;
 }
