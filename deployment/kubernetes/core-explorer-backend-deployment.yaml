@@ -26,7 +26,7 @@ spec:
               value:
             - name: AVATAR_LEGACY_CONTRACT
               value:
-            - name: ASSET_LEGACY_CONTRACT
+            - name: ITEM_LEGACY_CONTRACT
               value:
             - name: GEM_LEGACY_CONTRACT
               value:

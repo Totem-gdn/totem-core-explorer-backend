@@ -7,18 +7,19 @@ import { AssetLegacyRecord, CreateAssetLegacy } from './contract.interface';
 import { AssetType } from '../../utils/enums';
 import { ProviderService } from '../provider/provider.service';
 import { AssetLegacyService } from '../../repository/asset-legacy';
+import { withRetry } from '../../utils/helpers';
 
 @Injectable()
 export class TotemAssetLegacy implements OnApplicationBootstrap {
   private logger = new Logger(TotemAssetLegacy.name);
   private contracts: Record<AssetType, Contract | null> = {
     [AssetType.AVATAR]: null,
-    [AssetType.ASSET]: null,
+    [AssetType.ITEM]: null,
     [AssetType.GEM]: null,
   };
   private symbols: Record<AssetType, string | null> = {
     [AssetType.AVATAR]: null,
-    [AssetType.ASSET]: null,
+    [AssetType.ITEM]: null,
     [AssetType.GEM]: null,
   };
 
@@ -30,7 +31,7 @@ export class TotemAssetLegacy implements OnApplicationBootstrap {
 
   async onApplicationBootstrap() {
     await this.initContract(AssetType.AVATAR, 'AVATAR_LEGACY_CONTRACT');
-    await this.initContract(AssetType.ASSET, 'ASSET_LEGACY_CONTRACT');
+    await this.initContract(AssetType.ITEM, 'ITEM_LEGACY_CONTRACT');
     await this.initContract(AssetType.GEM, 'GEM_LEGACY_CONTRACT');
   }
 
@@ -93,21 +94,26 @@ export class TotemAssetLegacy implements OnApplicationBootstrap {
   }
 
   async create(assetType: AssetType, record: CreateAssetLegacy): Promise<string> {
-    const { maxFeePerGas, maxPriorityFeePerGas } = await this.providerService.getProvider().getFeeData();
     const gasLimit = await this.contracts[assetType].estimateGas.create(
       record.playerAddress,
       BigNumber.from(record.assetId),
       BigNumber.from(record.gameId),
       record.data,
     );
-    const tx = await this.contracts[assetType].create(
-      record.playerAddress,
-      BigNumber.from(record.assetId),
-      BigNumber.from(record.gameId),
-      record.data,
-      { gasLimit, maxFeePerGas, maxPriorityFeePerGas },
+    return await withRetry(
+      `[${this.symbols[assetType]}] AssetID: ${record.assetId} GameID: ${record.gameId}`,
+      async () => {
+        const { maxFeePerGas, maxPriorityFeePerGas } = await this.providerService.getProvider().getFeeData();
+        const tx = await this.contracts[assetType].create(
+          record.playerAddress,
+          BigNumber.from(record.assetId),
+          BigNumber.from(record.gameId),
+          record.data,
+          { gasLimit, maxFeePerGas, maxPriorityFeePerGas },
+        );
+        await tx.wait();
+        return tx.hash;
+      },
     );
-    await tx.wait();
-    return tx.hash;
   }
 }

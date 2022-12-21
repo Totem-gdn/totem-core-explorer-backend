@@ -9,10 +9,8 @@ import { GameStatus } from '../../../utils/enums';
   timestamps: false,
 })
 export class GamesDirectory {
+  @Prop({ type: SchemaTypes.String })
   _id: string;
-
-  @Prop({ type: SchemaTypes.String, required: true, index: true, unique: true })
-  recordId: string;
 
   @Prop({ type: SchemaTypes.String, required: true, index: true })
   owner: string;
@@ -23,23 +21,24 @@ export class GamesDirectory {
   @Prop({ type: SchemaTypes.String, required: true, index: true })
   author: string;
 
-  @Prop({ type: SchemaTypes.String, required: true })
+  @Prop({ type: SchemaTypes.String })
   renderer: string;
 
-  @Prop({ type: SchemaTypes.String, required: true })
+  @Prop({ type: SchemaTypes.String })
   avatarFilter: string;
 
-  @Prop({ type: SchemaTypes.String, required: true })
+  @Prop({ type: SchemaTypes.String })
   itemFilter: string;
 
-  @Prop({ type: SchemaTypes.String, required: true })
+  @Prop({ type: SchemaTypes.String })
   gemFilter: string;
 
-  @Prop({ type: SchemaTypes.String, required: true })
+  @Prop({ type: SchemaTypes.String })
   website: string;
 
   @Prop({ type: SchemaTypes.Number, required: true })
   createdAt: number;
+
   @Prop({ type: SchemaTypes.Number, required: true })
   updatedAt: number;
 

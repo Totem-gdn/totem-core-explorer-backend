@@ -24,8 +24,6 @@ message GameRecord {
   GameStatus status = 12;
 }
 
-message Empty {}
-
 message CreateGameRequest {
   string owner = 1;
   string name = 2;
@@ -42,60 +40,50 @@ message CreateGameResponse {
   string tx_hash = 1;
 }
 
-message UpdateGameOwnerRequest {
+message UpdateGameRequest {
   string record_id = 1;
-  string owner = 2;
+  optional string owner = 2;
+  optional string name = 3;
+  optional string author = 4;
+  optional string renderer = 5;
+  optional string avatar_filter = 6;
+  optional string item_filter = 7;
+  optional string gem_filter = 8;
+  optional string website = 9;
+  optional GameStatus status = 10;
 }
 
-message UpdateGameNameRequest {
-  string record_id = 1;
-  string name = 2;
+message UpdateGameResponse {
+  string tx_hash = 1;
 }
 
-message UpdateGameAuthorRequest {
-  string record_id = 1;
-  string author = 2;
+message FindAllRequest {
+  message Filters {
+    string owner = 1;
+  }
+  Filters filters = 1;
+  uint64 limit = 2;
+  uint64 offset = 3;
 }
 
-message UpdateGameRendererRequest {
-  string record_id = 1;
-  string renderer = 2;
+message FindAllResponse {
+  uint64 total = 1;
+  uint64 limit = 2;
+  uint64 offset = 3;
+  repeated GameRecord results = 4;
 }
 
-message UpdateGameAvatarFilterRequest {
+message FindByIdRequest {
   string record_id = 1;
-  string avatar_filter = 2;
 }
 
-message UpdateGameItemFilterRequest {
-  string record_id = 1;
-  string item_filter = 2;
-}
-
-message UpdateGameGemFilterRequest {
-  string record_id = 1;
-  string gem_filter = 2;
-}
-
-message UpdateGameWebsiteRequest {
-  string record_id = 1;
-  string website = 2;
-}
-
-message UpdateGameStatusRequest {
-  string record_id = 1;
-  GameStatus status = 2;
+message FindByIdResponse {
+  GameRecord record = 1;
 }
 
 service GamesDirectory {
   rpc Create (CreateGameRequest) returns (CreateGameResponse);
-  rpc UpdateGameOwner (UpdateGameOwnerRequest) returns (Empty);
-  rpc UpdateGameName (UpdateGameNameRequest) returns (Empty);
-  rpc UpdateGameAuthor (UpdateGameAuthorRequest) returns (Empty);
-  rpc UpdateGameRenderer (UpdateGameRendererRequest) returns (Empty);
-  rpc UpdateGameAvatarFilter (UpdateGameAvatarFilterRequest) returns (Empty);
-  rpc UpdateGameItemFilter (UpdateGameItemFilterRequest) returns (Empty);
-  rpc UpdateGameGemFilter (UpdateGameGemFilterRequest) returns (Empty);
-  rpc UpdateGameWebsite (UpdateGameWebsiteRequest) returns (Empty);
-  rpc UpdateGameStatus (UpdateGameStatusRequest) returns (Empty);
+  rpc Update (UpdateGameRequest) returns (UpdateGameResponse);
+  rpc FindAll (FindAllRequest) returns (FindAllResponse);
+  rpc FindById (FindByIdRequest) returns (FindByIdResponse);
 }

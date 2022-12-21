@@ -5,15 +5,15 @@ import { LegacyRecord } from '../common/legacy-record';
 
 @Schema({
   autoCreate: true,
-  collection: 'assetLegacy',
+  collection: 'itemLegacy',
   _id: false,
   timestamps: false,
 })
-export class AssetLegacy extends LegacyRecord {
+export class ItemLegacy extends LegacyRecord {
   @Prop({ type: SchemaTypes.String })
   _id: string;
 }
 
-export type AssetLegacyDocument = AssetLegacy & Document;
+export type ItemLegacyDocument = ItemLegacy & Document;
 
-export const AssetLegacySchema = SchemaFactory.createForClass(AssetLegacy);
+export const ItemLegacySchema = SchemaFactory.createForClass(ItemLegacy);

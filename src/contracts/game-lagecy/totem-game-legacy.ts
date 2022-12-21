@@ -6,6 +6,7 @@ import * as TotemGameLegacyABI from '../abi/TotemGameLegacy.json';
 import { CreateGameLegacy, GameLegacyRecord } from './contract.interface';
 import { ProviderService } from '../provider/provider.service';
 import { GameLegacyService } from '../../repository/game-legacy';
+import { withRetry } from '../../utils/helpers';
 
 @Injectable()
 export class TotemGameLegacy implements OnApplicationBootstrap {
@@ -70,14 +71,16 @@ export class TotemGameLegacy implements OnApplicationBootstrap {
   }
 
   async create(record: CreateGameLegacy): Promise<string> {
-    const { maxFeePerGas, maxPriorityFeePerGas } = await this.providerService.getProvider().getFeeData();
     const gasLimit = await this.contract.estimateGas.create(BigNumber.from(record.gameId), record.data);
-    const tx = await this.contract.create(BigNumber.from(record.gameId), record.data, {
-      gasLimit,
-      maxFeePerGas,
-      maxPriorityFeePerGas,
+    return await withRetry(`[${this.symbol}] GameID: ${record.gameId}`, async () => {
+      const { maxFeePerGas, maxPriorityFeePerGas } = await this.providerService.getProvider().getFeeData();
+      const tx = await this.contract.create(BigNumber.from(record.gameId), record.data, {
+        gasLimit,
+        maxFeePerGas,
+        maxPriorityFeePerGas,
+      });
+      await tx.wait();
+      return tx.hash;
     });
-    await tx.wait();
-    return tx.hash;
   }
 }

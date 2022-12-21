@@ -2,9 +2,6 @@ import { Prop } from '@nestjs/mongoose';
 import { SchemaTypes } from 'mongoose';
 
 export class LegacyRecord {
-  @Prop({ type: SchemaTypes.String, required: true, index: true, unique: true })
-  recordId: string;
-
   @Prop({ type: SchemaTypes.String, required: true, index: true })
   playerAddress: string;
 
