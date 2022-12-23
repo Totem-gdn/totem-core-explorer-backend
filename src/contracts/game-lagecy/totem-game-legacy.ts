@@ -1,5 +1,7 @@
 import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { InjectRedis } from '@liaoliaots/nestjs-redis';
+import Redis from 'ioredis';
 import { BigNumber, Contract, Event } from 'ethers';
 
 import * as TotemGameLegacyABI from '../abi/TotemGameLegacy.json';
@@ -11,10 +13,13 @@ import { withRetry } from '../../utils/helpers';
 @Injectable()
 export class TotemGameLegacy implements OnApplicationBootstrap {
   private logger = new Logger(TotemGameLegacy.name);
+  private storageKey = 'contracts::gameLegacy::blockNumber';
+  private deployBlockNumber = '29570000';
   private contract: Contract;
   private symbol: string;
 
   constructor(
+    @InjectRedis() private redis: Redis,
     private config: ConfigService,
     private providerService: ProviderService,
     private repository: GameLegacyService,
@@ -32,17 +37,34 @@ export class TotemGameLegacy implements OnApplicationBootstrap {
     }
     this.contract = new Contract(address, TotemGameLegacyABI, this.providerService.getWallet());
     this.symbol = await this.contract.symbol();
-    // await this.fetchPreviousEvents();
+    await this.fetchPreviousEvents();
+    this.contract.on('GameLegacyRecord', (gameId: BigNumber, recordId: BigNumber, event: Event) => {
+      this.logger.log(
+        `[${this.symbol}][GameLegacyRecord] recordId: ${recordId.toString()} txHash: ${event.transactionHash}`,
+      );
+      this.createRecord(gameId, recordId, event);
+    });
+  }
 
-    this.contract.on(
-      this.contract.filters.GameLegacyRecord(),
-      (gameId: BigNumber, recordId: BigNumber, event: Event) => {
-        this.logger.log(
-          `[${this.symbol}][GameLegacyRecord] recordId: ${recordId.toString()} txHash: ${event.transactionHash}`,
-        );
-        this.createRecord(gameId, recordId, event);
-      },
-    );
+  private async fetchPreviousEvents() {
+    let block = await this.redis
+      .get(this.storageKey)
+      .then((blockNumber: string | null) => parseInt(blockNumber || this.deployBlockNumber, 10));
+    let currentBlock = await this.providerService.getProvider().getBlockNumber();
+    const blocksPerPage = 2000;
+    while (currentBlock > block) {
+      this.logger.log(`[${this.symbol}] fetching block from ${block} to ${block + blocksPerPage}`);
+      const events = await this.contract.queryFilter('GameLegacyRecord', block, block + blocksPerPage);
+      for (const event of events) {
+        const [gameId, recordId] = event.args;
+        await this.createRecord(gameId, recordId, event);
+      }
+      block += blocksPerPage + 1;
+      currentBlock = await this.providerService.getProvider().getBlockNumber();
+      await this.redis.set(this.storageKey, block);
+    }
+    this.logger.log(`[${this.symbol}] fetching of previous events complete`);
+    this.logger.log(`[${this.symbol}] current block ${currentBlock}`);
   }
 
   private async createRecord(gameId: BigNumber, recordId: BigNumber, event: Event) {

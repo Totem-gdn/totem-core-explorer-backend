@@ -1,5 +1,7 @@
 import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { InjectRedis } from '@liaoliaots/nestjs-redis';
+import Redis from 'ioredis';
 import { BigNumber, Contract, Event } from 'ethers';
 
 import { withRetry } from '../../utils/helpers';
@@ -11,11 +13,13 @@ import { GamesDirectoryService } from '../../repository/games-directory';
 @Injectable()
 export class TotemGamesDirectory implements OnApplicationBootstrap {
   private logger = new Logger(TotemGamesDirectory.name);
-
+  private storageKey = 'contracts::gamesDirectory::blockNumber';
+  private deployBlockNumber = '29500000';
   private contract: Contract;
   private symbol: string;
 
   constructor(
+    @InjectRedis() private redis: Redis,
     private config: ConfigService,
     private providerService: ProviderService,
     private repository: GamesDirectoryService,
@@ -33,13 +37,39 @@ export class TotemGamesDirectory implements OnApplicationBootstrap {
     }
     this.contract = new Contract(address, TotemGamesDirectoryABI, this.providerService.getWallet());
     this.symbol = await this.contract.symbol();
-    this.contract.on(this.contract.filters.CreateGame(), (owner: string, recordId: BigNumber, event: Event) => {
+    await this.fetchPreviousEvents();
+    this.contract.on('CreateGame', (owner: string, recordId: BigNumber, event: Event) => {
       this.logger.log(`[${this.symbol}][CreateGame] recordId: ${recordId} txHash: ${event.transactionHash}`);
       this.createGame(owner, recordId, event);
     });
-    this.contract.on(this.contract.filters.UpdateGame(), (recordId: string, updatedField: string, event: Event) => {
+    this.contract.on('UpdateGame', (recordId: string, updatedField: string, event: Event) => {
       this.logger.log(`[${this.symbol}][UpdateGame] recordId: ${recordId} txHash: ${event.transactionHash}`);
     });
+  }
+
+  private async fetchPreviousEvents() {
+    let block = await this.redis
+      .get(this.storageKey)
+      .then((blockNumber: string | null) => parseInt(blockNumber || this.deployBlockNumber, 10));
+    let currentBlock = await this.providerService.getProvider().getBlockNumber();
+    const blocksPerPage = 2000;
+    while (currentBlock > block) {
+      this.logger.log(`[${this.symbol}] fetching block from ${block} to ${block + blocksPerPage}`);
+      const createEvents = await this.contract.queryFilter('CreateGame', block, block + blocksPerPage);
+      for (const event of createEvents) {
+        const [owner, recordId] = event.args;
+        await this.createGame(owner, recordId, event);
+      }
+      // const updateEvents = await this.contract.queryFilter('UpdateGame', block, block + blocksPerPage);
+      // for (const event of updateEvents) {
+      //   const [owner, recordId] = event.args;
+      // }
+      block += blocksPerPage + 1;
+      currentBlock = await this.providerService.getProvider().getBlockNumber();
+      await this.redis.set(this.storageKey, block);
+    }
+    this.logger.log(`[${this.symbol}] fetching of previous events complete`);
+    this.logger.log(`[${this.symbol}] current block ${currentBlock}`);
   }
 
   private async createGame(owner: string, recordId: BigNumber, event: Event) {
