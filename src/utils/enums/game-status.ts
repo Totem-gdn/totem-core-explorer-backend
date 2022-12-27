@@ -1,6 +1,6 @@
 export enum GameStatus {
-  PENDING,
-  ACCEPTED,
-  REJECTED,
-  BANNED,
+  Pending,
+  Accepted,
+  Rejected,
+  Banned,
 }

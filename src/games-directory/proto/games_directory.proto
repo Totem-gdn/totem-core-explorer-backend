@@ -54,12 +54,21 @@ message UpdateGameRequest {
 }
 
 message UpdateGameResponse {
-  string tx_hash = 1;
+  optional string ownerTxHash = 1;
+  optional string nameTxHash = 2;
+  optional string authorTxHash = 3;
+  optional string rendererTxHash = 4;
+  optional string avatarFilterTxHash = 5;
+  optional string itemFilterTxHash = 6;
+  optional string gemFilterTxHash = 7;
+  optional string websiteTxHash = 8;
+  optional string statusTxHash = 9;
 }
 
 message FindAllRequest {
   message Filters {
-    string owner = 1;
+    optional string owner = 1;
+    optional GameStatus status = 2;
   }
   Filters filters = 1;
   uint64 limit = 2;

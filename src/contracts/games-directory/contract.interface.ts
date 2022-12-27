@@ -30,3 +30,9 @@ export interface CreateGameRecord {
   };
   status: GameStatus;
 }
+
+export interface UpdateGameRecord {
+  recordId: string;
+  field: string;
+  data: string | GameStatus;
+}

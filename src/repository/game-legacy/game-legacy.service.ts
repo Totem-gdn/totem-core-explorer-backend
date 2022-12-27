@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -54,6 +54,9 @@ export class GameLegacyService {
 
   async findById({ recordId }: FindByRecordId): Promise<GameLegacyRecord> {
     const record = await this.model.findById(recordId).exec();
+    if (!record) {
+      throw new NotFoundException();
+    }
     return this.docToRecord(record);
   }
 }

@@ -48,12 +48,21 @@ export interface UpdateGameRequest {
 }
 
 export interface UpdateGameResponse {
-  txHash: string;
+  ownerTxHash?: string;
+  nameTxHash?: string;
+  authorTxHash?: string;
+  rendererTxHash?: string;
+  avatarFilterTxHash?: string;
+  itemFilterTxHash?: string;
+  gemFilterTxHash?: string;
+  websiteTxHash?: string;
+  statusTxHash?: string;
 }
 
 export interface FindAllRequest {
   filters: {
-    owner: string;
+    owner?: string;
+    status?: GameStatus;
   };
   limit: Long;
   offset: Long;

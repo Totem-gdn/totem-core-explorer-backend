@@ -26,23 +26,31 @@ export class TotemGameLegacy implements OnApplicationBootstrap {
   ) {}
 
   async onApplicationBootstrap() {
-    await this.initContract('GAME_LEGACY_CONTRACT');
+    this.initContract('GAME_LEGACY_CONTRACT').catch((ex) => {
+      if (ex instanceof Error) {
+        this.logger.error(ex.message, ex.stack);
+      } else {
+        this.logger.error(ex);
+      }
+    });
   }
 
-  private async initContract(env: string) {
-    const address = this.config.get<string>(env);
+  private async initContract(contractAddress: string) {
+    const address = this.config.get<string>(contractAddress);
     if (!address) {
-      this.logger.warn(`skipped ${env} contract initialization`);
+      this.logger.warn(`skipped ${contractAddress} contract initialization`);
       return;
     }
     this.contract = new Contract(address, TotemGameLegacyABI, this.providerService.getWallet());
     this.symbol = await this.contract.symbol();
+    this.logger = new Logger(this.symbol);
     await this.fetchPreviousEvents();
     this.contract.on('GameLegacyRecord', (gameId: BigNumber, recordId: BigNumber, event: Event) => {
-      this.logger.log(
-        `[${this.symbol}][GameLegacyRecord] recordId: ${recordId.toString()} txHash: ${event.transactionHash}`,
-      );
+      this.logger.log(`event: GameLegacyRecord recordId: ${recordId.toString()} txHash: ${event.transactionHash}`);
       this.createRecord(gameId, recordId, event);
+      this.redis.set(this.storageKey, event.blockNumber).catch(() => {
+        this.logger.error(`failed to store current event block number`);
+      });
     });
   }
 
@@ -50,21 +58,23 @@ export class TotemGameLegacy implements OnApplicationBootstrap {
     let block = await this.redis
       .get(this.storageKey)
       .then((blockNumber: string | null) => parseInt(blockNumber || this.deployBlockNumber, 10));
-    let currentBlock = await this.providerService.getProvider().getBlockNumber();
+    let currentBlock = await this.providerService.getBlockNumber();
     const blocksPerPage = 2000;
     while (currentBlock > block) {
-      this.logger.log(`[${this.symbol}] fetching block from ${block} to ${block + blocksPerPage}`);
+      this.logger.log(`fetching block from ${block} to ${block + blocksPerPage}`);
+      let maxBlockNumber = block;
       const events = await this.contract.queryFilter('GameLegacyRecord', block, block + blocksPerPage);
       for (const event of events) {
         const [gameId, recordId] = event.args;
         await this.createRecord(gameId, recordId, event);
+        maxBlockNumber = event.blockNumber;
       }
+      await this.redis.set(this.storageKey, maxBlockNumber);
       block += blocksPerPage + 1;
-      currentBlock = await this.providerService.getProvider().getBlockNumber();
-      await this.redis.set(this.storageKey, block);
+      currentBlock = await this.providerService.getBlockNumber();
     }
-    this.logger.log(`[${this.symbol}] fetching of previous events complete`);
-    this.logger.log(`[${this.symbol}] current block ${currentBlock}`);
+    this.logger.log(`fetching of previous events complete`);
+    this.logger.log(`current block ${currentBlock}`);
   }
 
   private async createRecord(gameId: BigNumber, recordId: BigNumber, event: Event) {
@@ -79,14 +89,12 @@ export class TotemGameLegacy implements OnApplicationBootstrap {
     } catch (ex) {
       if (ex instanceof Error) {
         this.logger.error(
-          `[${this.symbol}] recordId: ${recordId.toString()} txHash: ${event.transactionHash} Error: ${ex.message}`,
+          `recordId: ${recordId.toString()} txHash: ${event.transactionHash} Error: ${ex.message}`,
           ex.stack,
         );
       } else {
         this.logger.error(
-          `[${this.symbol}] recordId: ${recordId.toString()} txHash: ${event.transactionHash} Error: ${JSON.stringify(
-            ex,
-          )}`,
+          `recordId: ${recordId.toString()} txHash: ${event.transactionHash} Error: ${JSON.stringify(ex)}`,
         );
       }
     }
@@ -94,8 +102,8 @@ export class TotemGameLegacy implements OnApplicationBootstrap {
 
   async create(record: CreateGameLegacy): Promise<string> {
     const gasLimit = await this.contract.estimateGas.create(BigNumber.from(record.gameId), record.data);
-    return await withRetry(`[${this.symbol}] GameID: ${record.gameId}`, async () => {
-      const { maxFeePerGas, maxPriorityFeePerGas } = await this.providerService.getProvider().getFeeData();
+    return await withRetry(`GameID: ${record.gameId}`, async () => {
+      const { maxFeePerGas, maxPriorityFeePerGas } = await this.providerService.getFeeData();
       const tx = await this.contract.create(BigNumber.from(record.gameId), record.data, {
         gasLimit,
         maxFeePerGas,

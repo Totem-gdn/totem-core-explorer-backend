@@ -1,12 +1,11 @@
-import { Injectable, OnApplicationBootstrap, OnApplicationShutdown } from '@nestjs/common';
+import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { providers, Wallet } from 'ethers';
 
 @Injectable()
-export class ProviderService implements OnApplicationBootstrap, OnApplicationShutdown {
+export class ProviderService implements OnApplicationBootstrap {
   private wallet: Wallet;
   private provider: providers.JsonRpcProvider;
-  private intervalId: NodeJS.Timer;
 
   constructor(private config: ConfigService) {}
 
@@ -15,15 +14,15 @@ export class ProviderService implements OnApplicationBootstrap, OnApplicationShu
     this.wallet = new Wallet(this.config.get<string>('PROVIDER_PRIVATE_KEY'), this.provider);
   }
 
-  async onApplicationShutdown() {
-    clearInterval(this.intervalId);
-  }
-
   getWallet() {
     return this.wallet;
   }
 
-  getProvider() {
-    return this.provider;
+  async getBlockNumber() {
+    return this.provider.getBlockNumber();
+  }
+
+  async getFeeData() {
+    return this.provider.getFeeData();
   }
 }

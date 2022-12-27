@@ -14,6 +14,11 @@ import { withRetry } from '../../utils/helpers';
 @Injectable()
 export class TotemAssetLegacy implements OnApplicationBootstrap {
   private logger = new Logger(TotemAssetLegacy.name);
+  private contractLogger: Record<AssetType, Logger> = {
+    [AssetType.AVATAR]: this.logger,
+    [AssetType.ITEM]: this.logger,
+    [AssetType.GEM]: this.logger,
+  };
   private storageKeys: Record<AssetType, string> = {
     [AssetType.AVATAR]: 'contracts::avatarLegacy::blockNumber',
     [AssetType.ITEM]: 'contracts::itemLegacy::blockNumber',
@@ -43,31 +48,47 @@ export class TotemAssetLegacy implements OnApplicationBootstrap {
   ) {}
 
   async onApplicationBootstrap() {
-    await Promise.all([
-      this.initContract(AssetType.AVATAR, 'AVATAR_LEGACY_CONTRACT'),
-      this.initContract(AssetType.ITEM, 'ITEM_LEGACY_CONTRACT'),
-      this.initContract(AssetType.GEM, 'GEM_LEGACY_CONTRACT'),
-    ]);
+    this.initContract(AssetType.AVATAR, 'AVATAR_LEGACY_CONTRACT').catch((ex) => {
+      if (ex instanceof Error) {
+        this.logger.error(ex.message, ex.stack);
+      } else {
+        this.logger.error(ex);
+      }
+    });
+    this.initContract(AssetType.ITEM, 'ITEM_LEGACY_CONTRACT').catch((ex) => {
+      if (ex instanceof Error) {
+        this.logger.error(ex.message, ex.stack);
+      } else {
+        this.logger.error(ex);
+      }
+    });
+    this.initContract(AssetType.GEM, 'GEM_LEGACY_CONTRACT').catch((ex) => {
+      if (ex instanceof Error) {
+        this.logger.error(ex.message, ex.stack);
+      } else {
+        this.logger.error(ex);
+      }
+    });
   }
 
-  private async initContract(assetType: AssetType, env: string) {
-    const address = this.config.get<string>(env);
+  private async initContract(assetType: AssetType, contractAddress: string) {
+    const address = this.config.get<string>(contractAddress);
     if (!address) {
-      this.logger.warn(`skipped ${env} contract initialization`);
+      this.logger.warn(`skipped ${contractAddress} contract initialization`);
       return;
     }
     this.contracts[assetType] = new Contract(address, TotemAssetLegacyABI, this.providerService.getWallet());
     this.symbols[assetType] = await this.contracts[assetType].symbol();
+    this.contractLogger[assetType] = new Logger(this.symbols[assetType]);
     await this.fetchPreviousEvents(assetType);
     this.contracts[assetType].on(
       'AssetLegacyRecord',
       (player: string, assetId: BigNumber, gameId: BigNumber, recordId: BigNumber, event: Event) => {
-        this.logger.log(
-          `[${this.symbols[assetType]}][AssetLegacyRecord] recordId: ${recordId.toString()} txHash: ${
-            event.transactionHash
-          }`,
-        );
+        this.contractLogger[assetType].log(`event: AssetLegacyRecord txHash: ${event.transactionHash}`);
         this.createRecord(assetType, player, assetId, gameId, recordId, event);
+        this.redis.set(this.storageKeys[assetType], event.blockNumber).catch(() => {
+          this.contractLogger[assetType].error(`failed to store current event block number`);
+        });
       },
     );
   }
@@ -76,21 +97,23 @@ export class TotemAssetLegacy implements OnApplicationBootstrap {
     let block = await this.redis
       .get(this.storageKeys[assetType])
       .then((blockNumber: string | null) => parseInt(blockNumber || this.deployBlockNumber[assetType], 10));
-    let currentBlock = await this.providerService.getProvider().getBlockNumber();
+    let currentBlock = await this.providerService.getBlockNumber();
     const blocksPerPage = 2000;
     while (currentBlock > block) {
-      this.logger.log(`[${this.symbols[assetType]}] fetching block from ${block} to ${block + blocksPerPage}`);
+      this.contractLogger[assetType].log(`fetching block from ${block} to ${block + blocksPerPage}`);
+      let maxBlockNumber = block;
       const events = await this.contracts[assetType].queryFilter('AssetLegacyRecord', block, block + blocksPerPage);
       for (const event of events) {
         const [player, assetId, gameId, recordId] = event.args;
         await this.createRecord(assetType, player, assetId, gameId, recordId, event);
+        maxBlockNumber = event.blockNumber;
       }
+      await this.redis.set(this.storageKeys[assetType], maxBlockNumber);
       block += blocksPerPage + 1;
-      currentBlock = await this.providerService.getProvider().getBlockNumber();
-      await this.redis.set(this.storageKeys[assetType], block);
+      currentBlock = await this.providerService.getBlockNumber();
     }
-    this.logger.log(`[${this.symbols[assetType]}] fetching of previous events complete`);
-    this.logger.log(`[${this.symbols[assetType]}] current block ${currentBlock}`);
+    this.contractLogger[assetType].log(`fetching of previous events complete`);
+    this.contractLogger[assetType].log(`current block ${currentBlock}`);
   }
 
   private async createRecord(
@@ -114,17 +137,13 @@ export class TotemAssetLegacy implements OnApplicationBootstrap {
       });
     } catch (ex) {
       if (ex instanceof Error) {
-        this.logger.error(
-          `[${this.symbols[assetType]}] recordId: ${recordId.toString()} txHash: ${event.transactionHash} Error: ${
-            ex.message
-          }`,
+        this.contractLogger[assetType].error(
+          `recordId: ${recordId.toString()} txHash: ${event.transactionHash} Error: ${ex.message}`,
           ex.stack,
         );
       } else {
-        this.logger.error(
-          `[${this.symbols[assetType]}] recordId: ${recordId.toString()} txHash: ${
-            event.transactionHash
-          } Error: ${JSON.stringify(ex)}`,
+        this.contractLogger[assetType].error(
+          `recordId: ${recordId.toString()} txHash: ${event.transactionHash} Error: ${JSON.stringify(ex)}`,
         );
       }
     }
@@ -137,20 +156,17 @@ export class TotemAssetLegacy implements OnApplicationBootstrap {
       BigNumber.from(record.gameId),
       record.data,
     );
-    return await withRetry(
-      `[${this.symbols[assetType]}] AssetID: ${record.assetId} GameID: ${record.gameId}`,
-      async () => {
-        const { maxFeePerGas, maxPriorityFeePerGas } = await this.providerService.getProvider().getFeeData();
-        const tx = await this.contracts[assetType].create(
-          record.playerAddress,
-          BigNumber.from(record.assetId),
-          BigNumber.from(record.gameId),
-          record.data,
-          { gasLimit, maxFeePerGas, maxPriorityFeePerGas },
-        );
-        await tx.wait();
-        return tx.hash;
-      },
-    );
+    return await withRetry(`AssetType: ${assetType} AssetID: ${record.assetId} GameID: ${record.gameId}`, async () => {
+      const { maxFeePerGas, maxPriorityFeePerGas } = await this.providerService.getFeeData();
+      const tx = await this.contracts[assetType].create(
+        record.playerAddress,
+        BigNumber.from(record.assetId),
+        BigNumber.from(record.gameId),
+        record.data,
+        { gasLimit, maxFeePerGas, maxPriorityFeePerGas },
+      );
+      await tx.wait();
+      return tx.hash;
+    });
   }
 }
