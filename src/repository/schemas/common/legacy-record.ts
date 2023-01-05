@@ -9,7 +9,7 @@ export class LegacyRecord {
   assetId: string;
 
   @Prop({ type: SchemaTypes.String, required: true, index: true })
-  gameId: string;
+  gameAddress: string;
 
   @Prop({ type: SchemaTypes.Number, required: true })
   timestamp: number;

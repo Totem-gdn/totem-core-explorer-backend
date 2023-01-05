@@ -2,14 +2,14 @@ import { BigNumber } from 'ethers';
 
 export interface AssetLegacyRecord {
   assetId: BigNumber;
-  gameId: BigNumber;
+  gameAddress: string;
   timestamp: BigNumber;
   data: string;
 }
 
 export interface CreateAssetLegacy {
   playerAddress: string;
+  gameAddress: string;
   assetId: string;
-  gameId: string;
   data: string;
 }

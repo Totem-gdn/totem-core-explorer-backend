@@ -45,7 +45,7 @@ export class AssetLegacyService {
       recordId: doc._id,
       playerAddress: doc.playerAddress,
       assetId: doc.assetId,
-      gameId: doc.gameId,
+      gameAddress: doc.gameAddress,
       timestamp: doc.timestamp,
       data: doc.data,
     };

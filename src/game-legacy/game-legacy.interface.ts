@@ -3,13 +3,13 @@ import { Long } from '@grpc/proto-loader';
 
 export interface GameLegacyRecord {
   recordId: string;
-  gameId: string;
+  gameAddress: string;
   timestamp: Long;
   data: string;
 }
 
 export interface CreateGameLegacyRequest {
-  gameId: string;
+  gameAddress: string;
   data: string;
 }
 
@@ -19,7 +19,7 @@ export interface CreateGameLegacyResponse {
 
 export interface FindAllRequest {
   filters: {
-    gameId: string;
+    gameAddress: string;
   };
   limit: Long;
   offset: Long;

@@ -7,7 +7,7 @@ import {
   CreateGameRecord,
   FindAllQuery,
   FindAllResult,
-  FindByRecordId,
+  FindByAddress,
   GameRecord,
   UpdateGameRecord,
 } from './games-directory.interface';
@@ -18,8 +18,8 @@ export class GamesDirectoryService {
 
   private docToRecord(doc: GameDocument): GameRecord {
     return {
-      recordId: doc._id,
-      owner: doc.owner,
+      gameAddress: doc._id,
+      ownerAddress: doc.ownerAddress,
       name: doc.name,
       author: doc.author,
       renderer: doc.renderer,
@@ -34,13 +34,27 @@ export class GamesDirectoryService {
   }
 
   async create(request: CreateGameRecord) {
-    const { recordId, ...record } = request;
-    await this.model.create({ _id: recordId, ...record });
+    const { gameAddress, ...record } = request;
+    await this.model.create({ _id: gameAddress, ...record });
   }
 
   async update(request: UpdateGameRecord) {
-    const { recordId, updatedField, data, updatedAt } = request;
-    await this.model.updateOne({ _id: recordId }, { [updatedField]: data, updatedAt });
+    const { gameAddress, ...record } = request;
+    await this.model.updateOne(
+      { _id: gameAddress },
+      {
+        ownerAddress: record.ownerAddress,
+        name: record.name,
+        author: record.author,
+        renderer: record.renderer,
+        avatarFilter: record.avatarFilter,
+        itemFilter: record.itemFilter,
+        gemFilter: record.gemFilter,
+        website: record.website,
+        updatedAt: record.updatedAt,
+        status: record.status,
+      },
+    );
   }
 
   async findAll(request: FindAllQuery): Promise<FindAllResult> {
@@ -66,11 +80,16 @@ export class GamesDirectoryService {
     };
   }
 
-  async findById({ recordId }: FindByRecordId): Promise<GameRecord> {
-    const record = await this.model.findById(recordId).exec();
+  async findByAddress({ gameAddress }: FindByAddress): Promise<GameRecord> {
+    const record = await this.model.findById(gameAddress).exec();
     if (!record) {
       throw new NotFoundException();
     }
     return this.docToRecord(record);
+  }
+
+  async isExists(gameAddress: string): Promise<boolean> {
+    const record = await this.model.findById(gameAddress).exec();
+    return !!record;
   }
 }

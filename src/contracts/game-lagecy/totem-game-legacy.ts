@@ -14,7 +14,7 @@ import { withRetry } from '../../utils/helpers';
 export class TotemGameLegacy implements OnApplicationBootstrap {
   private logger = new Logger(TotemGameLegacy.name);
   private storageKey = 'contracts::gameLegacy::blockNumber';
-  private deployBlockNumber = '29570000';
+  private deployBlockNumber = '30575000';
   private contract: Contract;
   private symbol: string;
 
@@ -45,9 +45,9 @@ export class TotemGameLegacy implements OnApplicationBootstrap {
     this.symbol = await this.contract.symbol();
     this.logger = new Logger(this.symbol);
     await this.fetchPreviousEvents();
-    this.contract.on('GameLegacyRecord', (gameId: BigNumber, recordId: BigNumber, event: Event) => {
+    this.contract.on('GameLegacyRecord', (gameAddress: string, recordId: BigNumber, event: Event) => {
       this.logger.log(`event: GameLegacyRecord recordId: ${recordId.toString()} txHash: ${event.transactionHash}`);
-      this.createRecord(gameId, recordId, event);
+      this.createRecord(gameAddress, recordId, event);
       this.redis.set(this.storageKey, event.blockNumber).catch(() => {
         this.logger.error(`failed to store current event block number`);
       });
@@ -65,8 +65,8 @@ export class TotemGameLegacy implements OnApplicationBootstrap {
       let maxBlockNumber = block;
       const events = await this.contract.queryFilter('GameLegacyRecord', block, block + blocksPerPage);
       for (const event of events) {
-        const [gameId, recordId] = event.args;
-        await this.createRecord(gameId, recordId, event);
+        const [gameAddress, recordId] = event.args;
+        await this.createRecord(gameAddress, recordId, event);
         maxBlockNumber = event.blockNumber;
       }
       await this.redis.set(this.storageKey, maxBlockNumber);
@@ -77,12 +77,12 @@ export class TotemGameLegacy implements OnApplicationBootstrap {
     this.logger.log(`current block ${currentBlock}`);
   }
 
-  private async createRecord(gameId: BigNumber, recordId: BigNumber, event: Event) {
+  private async createRecord(gameAddress: string, recordId: BigNumber, event: Event) {
     try {
       const record: GameLegacyRecord = await this.contract.recordByIndex(recordId);
       await this.repository.create({
         recordId: recordId.toString(),
-        gameId: gameId.toString(),
+        gameAddress,
         timestamp: record.timestamp.toNumber(),
         data: record.data,
       });
@@ -101,16 +101,22 @@ export class TotemGameLegacy implements OnApplicationBootstrap {
   }
 
   async create(record: CreateGameLegacy): Promise<string> {
-    const gasLimit = await this.contract.estimateGas.create(BigNumber.from(record.gameId), record.data);
-    return await withRetry(`GameID: ${record.gameId}`, async () => {
-      const { maxFeePerGas, maxPriorityFeePerGas } = await this.providerService.getFeeData();
-      const tx = await this.contract.create(BigNumber.from(record.gameId), record.data, {
-        gasLimit,
-        maxFeePerGas,
-        maxPriorityFeePerGas,
-      });
-      await tx.wait();
-      return tx.hash;
-    });
+    const gasLimit = await this.contract.estimateGas.create(record.gameAddress, record.data);
+    return await withRetry(
+      `Game: ${record.gameAddress}`,
+      async () => {
+        const { maxFeePerGas, maxPriorityFeePerGas } = await this.providerService.getFeeData();
+        const tx = await this.contract.create(record.gameAddress, record.data, {
+          gasLimit,
+          maxFeePerGas,
+          maxPriorityFeePerGas,
+        });
+        await tx.wait();
+        return tx.hash;
+      },
+      {
+        maxRetries: 60,
+      },
+    );
   }
 }

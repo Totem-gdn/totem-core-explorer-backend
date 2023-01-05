@@ -1,20 +1,20 @@
 export interface CreateGameLegacy {
   recordId: string;
-  gameId: string;
+  gameAddress: string;
   timestamp: number;
   data: string;
 }
 
 export interface GameLegacyRecord {
   recordId: string;
-  gameId: string;
+  gameAddress: string;
   timestamp: number;
   data: string;
 }
 
 export interface FindAllQuery {
   filters: {
-    gameId: string;
+    gameAddress: string;
   };
   limit: number;
   offset: number;

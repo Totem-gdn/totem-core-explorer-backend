@@ -12,7 +12,7 @@ message AssetLegacyRecord {
   string record_id = 1;
   string player_address = 2;
   string asset_id = 3;
-  string game_id = 4;
+  string game_address = 4;
   int64 timestamp = 5;
   string data = 6;
 }
@@ -21,7 +21,7 @@ message CreateAssetLegacyRequest {
   AssetType asset_type = 1;
   string player_address = 2;
   string asset_id = 3;
-  string game_id = 4;
+  string game_address = 4;
   string data = 5;
 }
 
@@ -33,7 +33,7 @@ message FindAllRequest {
   message Filters {
     string player_address = 1;
     string asset_id = 2;
-    string game_id = 3;
+    string game_address = 3;
   }
   AssetType asset_type = 1;
   Filters filters = 2;

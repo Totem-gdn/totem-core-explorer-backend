@@ -5,7 +5,7 @@ export interface CreateAssetLegacy {
   recordId: string;
   playerAddress: string;
   assetId: string;
-  gameId: string;
+  gameAddress: string;
   timestamp: number;
   data: string;
 }
@@ -14,7 +14,7 @@ export interface AssetLegacyRecord {
   recordId: string;
   playerAddress: string;
   assetId: string;
-  gameId: string;
+  gameAddress: string;
   timestamp: number;
   data: string;
 }
@@ -24,7 +24,7 @@ export interface FindAllQuery {
   filters: {
     playerAddress?: string;
     assetId?: string;
-    gameId?: string;
+    gameAddress?: string;
   };
   limit: number;
   offset: number;

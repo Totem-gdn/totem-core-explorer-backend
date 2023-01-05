@@ -1,8 +1,8 @@
 import { GameStatus } from '../../utils/enums';
 
 export interface CreateGameRecord {
-  recordId: string;
-  owner: string;
+  gameAddress: string;
+  ownerAddress: string;
   name: string;
   author: string;
   renderer: string;
@@ -16,15 +16,22 @@ export interface CreateGameRecord {
 }
 
 export interface UpdateGameRecord {
-  recordId: string;
-  updatedField: string;
-  data: string | GameStatus;
+  gameAddress: string;
+  ownerAddress: string;
+  name: string;
+  author: string;
+  renderer: string;
+  avatarFilter: string;
+  itemFilter: string;
+  gemFilter: string;
+  website: string;
   updatedAt: number;
+  status: GameStatus;
 }
 
 export interface GameRecord {
-  recordId: string;
-  owner: string;
+  gameAddress: string;
+  ownerAddress: string;
   name: string;
   author: string;
   renderer: string;
@@ -39,7 +46,7 @@ export interface GameRecord {
 
 export interface FindAllQuery {
   filters: {
-    owner?: string;
+    ownerAddress?: string;
     status?: GameStatus;
   };
   limit: number;
@@ -53,6 +60,6 @@ export interface FindAllResult {
   results: GameRecord[];
 }
 
-export interface FindByRecordId {
-  recordId: string;
+export interface FindByAddress {
+  gameAddress: string;
 }

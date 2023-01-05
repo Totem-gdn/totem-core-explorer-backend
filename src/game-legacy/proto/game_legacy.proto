@@ -4,13 +4,13 @@ package game_legacy;
 
 message GameLegacyRecord {
   string record_id = 1;
-  string game_id = 2;
+  string game_address = 2;
   int64 timestamp = 3;
   string data = 4;
 }
 
 message CreateGameLegacyRequest {
-  string game_id = 1;
+  string game_address = 1;
   string data = 2;
 }
 
@@ -20,7 +20,7 @@ message CreateGameLegacyResponse {
 
 message FindAllRequest {
   message Filters {
-    string game_id = 1;
+    string game_address = 1;
   }
   Filters filters = 1;
   uint64 limit = 2;

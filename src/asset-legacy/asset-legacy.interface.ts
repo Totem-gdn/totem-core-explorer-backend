@@ -7,7 +7,7 @@ export interface AssetLegacyRecord {
   recordId: string;
   playerAddress: string;
   assetId: string;
-  gameId: string;
+  gameAddress: string;
   timestamp: Long;
   data: string;
 }
@@ -16,7 +16,7 @@ export interface CreateAssetLegacyRequest {
   assetType: AssetType;
   playerAddress: string;
   assetId: string;
-  gameId: string;
+  gameAddress: string;
   data: string;
 }
 
@@ -29,7 +29,7 @@ export interface FindAllRequest {
   filters: {
     playerAddress: string;
     assetId: string;
-    gameId: string;
+    gameAddress: string;
   };
   limit: Long;
   offset: Long;

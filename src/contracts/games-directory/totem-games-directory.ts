@@ -2,7 +2,7 @@ import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import Redis from 'ioredis';
-import { BigNumber, Contract, Event } from 'ethers';
+import { Contract, Event } from 'ethers';
 
 import { withRetry } from '../../utils/helpers';
 import * as TotemGamesDirectoryABI from '../abi/TotemGamesDirectory.json';
@@ -14,20 +14,9 @@ import { GamesDirectoryService } from '../../repository/games-directory';
 export class TotemGamesDirectory implements OnApplicationBootstrap {
   private logger = new Logger(TotemGamesDirectory.name);
   private storageKey = 'contracts::gamesDirectory::blockNumber';
-  private deployBlockNumber = '29500000';
+  private deployBlockNumber = '30575000';
   private contract: Contract;
   private symbol: string;
-  private updateContractFunction = {
-    owner: 'changeOwner',
-    name: 'changeName',
-    author: 'changeAuthor',
-    renderer: 'changeRenderer',
-    avatarFilter: 'changeAvatarFilter',
-    itemFilter: 'changeItemFilter',
-    gemFilter: 'changeGemFilter',
-    website: 'changeWebsite',
-    status: 'changeStatus',
-  };
 
   constructor(
     @InjectRedis() private redis: Redis,
@@ -56,18 +45,16 @@ export class TotemGamesDirectory implements OnApplicationBootstrap {
     this.symbol = await this.contract.symbol();
     this.logger = new Logger(this.symbol);
     await this.fetchPreviousEvents();
-    this.contract.on('CreateGame', (owner: string, recordId: BigNumber, event: Event) => {
+    this.contract.on('CreateGame', (gameAddress: string, ownerAddress: string, event: Event) => {
       this.logger.log(
-        `[${this.symbol}][CreateGame] recordId: ${recordId} owner: ${owner} txHash: ${event.transactionHash}`,
+        `event: CreateGame gameAddress: ${gameAddress} ownerAddress: ${ownerAddress} txHash: ${event.transactionHash}`,
       );
-      this.createGame(owner, recordId, event);
+      this.createGame(gameAddress, ownerAddress, event);
       this.redis.set(this.storageKey, event.blockNumber);
     });
-    this.contract.on('UpdateGame', (recordId: BigNumber, updatedField: string, event: Event) => {
-      this.logger.log(
-        `event: UpdateGame recordId: ${recordId} field: ${updatedField} txHash: ${event.transactionHash}`,
-      );
-      this.updateGame(recordId, updatedField, event);
+    this.contract.on('UpdateGame', (gameAddress: string, event: Event) => {
+      this.logger.log(`event: UpdateGame gameAddress: ${gameAddress} txHash: ${event.transactionHash}`);
+      this.updateGame(gameAddress, event);
       this.redis.set(this.storageKey, event.blockNumber);
     });
   }
@@ -83,14 +70,14 @@ export class TotemGamesDirectory implements OnApplicationBootstrap {
       let maxBlockNumber = block;
       const createEvents = await this.contract.queryFilter('CreateGame', block, block + blocksPerPage);
       for (const event of createEvents) {
-        const [owner, recordId] = event.args;
-        await this.createGame(owner, recordId, event);
+        const [gameAddress, ownerAddress] = event.args;
+        await this.createGame(gameAddress, ownerAddress, event);
         maxBlockNumber = event.blockNumber > maxBlockNumber ? event.blockNumber : maxBlockNumber;
       }
       const updateEvents = await this.contract.queryFilter('UpdateGame', block, block + blocksPerPage);
       for (const event of updateEvents) {
-        const [recordId, updatedField] = event.args;
-        await this.updateGame(recordId, updatedField, event);
+        const [gameAddress] = event.args;
+        await this.updateGame(gameAddress, event);
         maxBlockNumber = event.blockNumber > maxBlockNumber ? event.blockNumber : maxBlockNumber;
       }
       await this.redis.set(this.storageKey, maxBlockNumber);
@@ -101,12 +88,12 @@ export class TotemGamesDirectory implements OnApplicationBootstrap {
     this.logger.log(`current block ${currentBlock}`);
   }
 
-  private async createGame(owner: string, recordId: BigNumber, event: Event) {
+  private async createGame(gameAddress: string, ownerAddress: string, event: Event) {
     try {
-      const { game, status }: GameRecord = await this.contract.recordByIndex(recordId);
+      const game: GameRecord = await this.contract.gameByAddress(gameAddress);
       await this.repository.create({
-        recordId: recordId.toString(),
-        owner,
+        gameAddress,
+        ownerAddress,
         name: game.name,
         author: game.author,
         renderer: game.renderer,
@@ -116,81 +103,91 @@ export class TotemGamesDirectory implements OnApplicationBootstrap {
         website: game.website,
         createdAt: game.createdAt.toNumber(),
         updatedAt: game.updatedAt.toNumber(),
-        status,
+        status: game.status,
       });
     } catch (ex) {
       if (ex instanceof Error) {
         this.logger.error(
-          `event: CreateGame recordId: ${recordId.toString()} txHash: ${event.transactionHash} Error: ${ex.message}`,
+          `event: CreateGame gameAddress: ${gameAddress} txHash: ${event.transactionHash} Error: ${ex.message}`,
           ex.stack,
         );
       } else {
         this.logger.error(
-          `event: CreateGame recordId: ${recordId.toString()} txHash: ${event.transactionHash} Error: ${JSON.stringify(
-            ex,
-          )}`,
+          `event: CreateGame gameAddress: ${gameAddress} txHash: ${event.transactionHash} Error: ${JSON.stringify(ex)}`,
         );
       }
     }
   }
 
-  private async updateGame(recordId: BigNumber, updatedField: string, event: Event) {
+  private async updateGame(gameAddress: string, event: Event) {
     try {
-      const { game, status }: GameRecord = await this.contract.recordByIndex(recordId);
+      const game: GameRecord = await this.contract.gameByAddress(gameAddress);
       await this.repository.update({
-        recordId: recordId.toString(),
-        updatedField: updatedField,
-        data: updatedField === 'status' ? status : game[updatedField],
+        gameAddress,
+        ownerAddress: game.ownerAddress,
+        name: game.name,
+        author: game.author,
+        renderer: game.renderer,
+        avatarFilter: game.avatarFilter,
+        itemFilter: game.itemFilter,
+        gemFilter: game.gemFilter,
+        website: game.website,
         updatedAt: game.updatedAt.toNumber(),
+        status: game.status,
       });
     } catch (ex) {
       if (ex instanceof Error) {
         this.logger.error(
-          `event: UpdateGame recordId: ${recordId.toString()} txHash: ${event.transactionHash} Error: ${ex.message}`,
+          `event: UpdateGame gameAddress: ${gameAddress} txHash: ${event.transactionHash} Error: ${ex.message}`,
           ex.stack,
         );
       } else {
         this.logger.error(
-          `event: UpdateGame recordId: ${recordId.toString()} txHash: ${event.transactionHash} Error: ${JSON.stringify(
-            ex,
-          )}`,
+          `event: UpdateGame gameAddress: ${gameAddress} txHash: ${event.transactionHash} Error: ${JSON.stringify(ex)}`,
         );
       }
     }
   }
 
   async create(record: CreateGameRecord): Promise<string> {
-    const gasLimit = await this.contract.estimateGas.create(record.owner, record.game, record.status);
-    return await withRetry(`GameName: ${record.game.name}`, async () => {
-      const { maxFeePerGas, maxPriorityFeePerGas } = await this.providerService.getFeeData();
-      const tx = await this.contract.create(record.owner, record.game, record.status, {
-        gasLimit,
-        maxFeePerGas,
-        maxPriorityFeePerGas,
-      });
-      await tx.wait();
-      return tx.hash;
-    });
-  }
-
-  async update(record: UpdateGameRecord): Promise<string> {
-    const gasLimit = await this.contract.estimateGas[this.updateContractFunction[record.field]](
-      BigNumber.from(record.recordId),
-      record.data,
-    );
-    return await withRetry(`GameId: ${record.recordId} Field: ${record.field}`, async () => {
-      const { maxFeePerGas, maxPriorityFeePerGas } = await this.providerService.getFeeData();
-      const tx = await this.contract[this.updateContractFunction[record.field]](
-        BigNumber.from(record.recordId),
-        record.data,
-        {
+    const { gameAddress, ...game } = record;
+    const gasLimit = await this.contract.estimateGas.create(gameAddress, game);
+    return await withRetry(
+      `CreateGame: ${gameAddress}`,
+      async () => {
+        const { maxFeePerGas, maxPriorityFeePerGas } = await this.providerService.getFeeData();
+        const tx = await this.contract.create(gameAddress, game, {
           gasLimit,
           maxFeePerGas,
           maxPriorityFeePerGas,
-        },
-      );
-      await tx.wait();
-      return tx.hash;
-    });
+        });
+        await tx.wait();
+        return tx.hash;
+      },
+      {
+        maxRetries: 60,
+      },
+    );
+  }
+
+  async update(record: UpdateGameRecord): Promise<string> {
+    const { gameAddress, ...game } = record;
+    const gasLimit = await this.contract.estimateGas.update(gameAddress, game);
+    return await withRetry(
+      `UpdateGame: ${gameAddress}`,
+      async () => {
+        const { maxFeePerGas, maxPriorityFeePerGas } = await this.providerService.getFeeData();
+        const tx = await this.contract.update(gameAddress, game, {
+          gasLimit,
+          maxFeePerGas,
+          maxPriorityFeePerGas,
+        });
+        await tx.wait();
+        return tx.hash;
+      },
+      {
+        maxRetries: 60,
+      },
+    );
   }
 }

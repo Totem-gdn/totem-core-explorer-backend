@@ -18,7 +18,7 @@ export class GameLegacyService {
   private docToRecord(doc: GameLegacyDocument): GameLegacyRecord {
     return {
       recordId: doc._id,
-      gameId: doc.gameId,
+      gameAddress: doc.gameAddress,
       timestamp: doc.timestamp,
       data: doc.data,
     };

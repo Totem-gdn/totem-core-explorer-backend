@@ -10,10 +10,10 @@ import { GameStatus } from '../../../utils/enums';
 })
 export class GamesDirectory {
   @Prop({ type: SchemaTypes.String })
-  _id: string;
+  _id: string; // gameAddress
 
   @Prop({ type: SchemaTypes.String, required: true, index: true })
-  owner: string;
+  ownerAddress: string;
 
   @Prop({ type: SchemaTypes.String, required: true, index: true })
   name: string;

@@ -25,9 +25,9 @@ export class TotemAssetLegacy implements OnApplicationBootstrap {
     [AssetType.GEM]: 'contracts::gemLegacy::blockNumber',
   };
   private deployBlockNumber: Record<AssetType, string> = {
-    [AssetType.AVATAR]: '29570000',
-    [AssetType.ITEM]: '29570000',
-    [AssetType.GEM]: '29570000',
+    [AssetType.AVATAR]: '30575000',
+    [AssetType.ITEM]: '30575000',
+    [AssetType.GEM]: '30575000',
   };
   private contracts: Record<AssetType, Contract | null> = {
     [AssetType.AVATAR]: null,
@@ -83,9 +83,9 @@ export class TotemAssetLegacy implements OnApplicationBootstrap {
     await this.fetchPreviousEvents(assetType);
     this.contracts[assetType].on(
       'AssetLegacyRecord',
-      (player: string, assetId: BigNumber, gameId: BigNumber, recordId: BigNumber, event: Event) => {
+      (playerAddress: string, gameAddress: string, assetId: BigNumber, recordId: BigNumber, event: Event) => {
         this.contractLogger[assetType].log(`event: AssetLegacyRecord txHash: ${event.transactionHash}`);
-        this.createRecord(assetType, player, assetId, gameId, recordId, event);
+        this.createRecord(assetType, playerAddress, gameAddress, assetId, recordId, event);
         this.redis.set(this.storageKeys[assetType], event.blockNumber).catch(() => {
           this.contractLogger[assetType].error(`failed to store current event block number`);
         });
@@ -104,8 +104,8 @@ export class TotemAssetLegacy implements OnApplicationBootstrap {
       let maxBlockNumber = block;
       const events = await this.contracts[assetType].queryFilter('AssetLegacyRecord', block, block + blocksPerPage);
       for (const event of events) {
-        const [player, assetId, gameId, recordId] = event.args;
-        await this.createRecord(assetType, player, assetId, gameId, recordId, event);
+        const [playerAddress, gameAddress, assetId, recordId] = event.args;
+        await this.createRecord(assetType, playerAddress, gameAddress, assetId, recordId, event);
         maxBlockNumber = event.blockNumber;
       }
       await this.redis.set(this.storageKeys[assetType], maxBlockNumber);
@@ -119,8 +119,8 @@ export class TotemAssetLegacy implements OnApplicationBootstrap {
   private async createRecord(
     assetType: AssetType,
     playerAddress: string,
+    gameAddress: string,
     assetId: BigNumber,
-    gameId: BigNumber,
     recordId: BigNumber,
     event: Event,
   ) {
@@ -131,7 +131,7 @@ export class TotemAssetLegacy implements OnApplicationBootstrap {
         recordId: recordId.toString(),
         playerAddress,
         assetId: assetId.toString(),
-        gameId: gameId.toString(),
+        gameAddress,
         timestamp: record.timestamp.toNumber(),
         data: record.data,
       });
@@ -152,21 +152,27 @@ export class TotemAssetLegacy implements OnApplicationBootstrap {
   async create(assetType: AssetType, record: CreateAssetLegacy): Promise<string> {
     const gasLimit = await this.contracts[assetType].estimateGas.create(
       record.playerAddress,
+      record.gameAddress,
       BigNumber.from(record.assetId),
-      BigNumber.from(record.gameId),
       record.data,
     );
-    return await withRetry(`AssetType: ${assetType} AssetID: ${record.assetId} GameID: ${record.gameId}`, async () => {
-      const { maxFeePerGas, maxPriorityFeePerGas } = await this.providerService.getFeeData();
-      const tx = await this.contracts[assetType].create(
-        record.playerAddress,
-        BigNumber.from(record.assetId),
-        BigNumber.from(record.gameId),
-        record.data,
-        { gasLimit, maxFeePerGas, maxPriorityFeePerGas },
-      );
-      await tx.wait();
-      return tx.hash;
-    });
+    return await withRetry(
+      `AssetType: ${assetType} AssetID: ${record.assetId} Game: ${record.gameAddress}`,
+      async () => {
+        const { maxFeePerGas, maxPriorityFeePerGas } = await this.providerService.getFeeData();
+        const tx = await this.contracts[assetType].create(
+          record.playerAddress,
+          record.gameAddress,
+          BigNumber.from(record.assetId),
+          record.data,
+          { gasLimit, maxFeePerGas, maxPriorityFeePerGas },
+        );
+        await tx.wait();
+        return tx.hash;
+      },
+      {
+        maxRetries: 60,
+      },
+    );
   }
 }

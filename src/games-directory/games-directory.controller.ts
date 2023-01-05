@@ -1,4 +1,4 @@
-import { Controller, UseFilters, UsePipes } from '@nestjs/common';
+import { BadRequestException, Controller, UseFilters, UsePipes } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import { Long } from '@grpc/proto-loader';
 
@@ -9,8 +9,8 @@ import {
   CreateGameResponse,
   FindAllRequest,
   FindAllResponse,
-  FindByIdRequest,
-  FindByIdResponse,
+  FindByAddressRequest,
+  FindByAddressResponse,
   UpdateGameRequest,
   UpdateGameResponse,
 } from './games-directory.interface';
@@ -25,8 +25,11 @@ export class GamesDirectoryController {
   @UsePipes(new RpcValidationPipe(true))
   @GrpcMethod('GamesDirectory', 'Create')
   async create(request: CreateGameRequest): Promise<CreateGameResponse> {
-    const { owner, status, ...game } = request;
-    const txHash = await this.contract.create({ owner, game, status });
+    const isExists = await this.repository.isExists(request.gameAddress);
+    if (isExists) {
+      throw new BadRequestException('game address is already exists');
+    }
+    const txHash = await this.contract.create(request);
     return { txHash };
   }
 
@@ -34,14 +37,8 @@ export class GamesDirectoryController {
   @UsePipes(new RpcValidationPipe(true))
   @GrpcMethod('GamesDirectory', 'Update')
   async update(request: UpdateGameRequest): Promise<UpdateGameResponse> {
-    const result: UpdateGameResponse = {};
-    const { recordId, ...updateFields } = request;
-    for (const field in updateFields) {
-      if (updateFields[field] !== null && updateFields[field] !== undefined) {
-        result[`${field}TxHash`] = await this.contract.update({ recordId, field, data: updateFields[field] });
-      }
-    }
-    return result;
+    const txHash = await this.contract.update(request);
+    return { txHash };
   }
 
   @UseFilters(UnhandledExceptionFilter)
@@ -67,9 +64,9 @@ export class GamesDirectoryController {
 
   @UseFilters(UnhandledExceptionFilter)
   @UsePipes(new RpcValidationPipe(true))
-  @GrpcMethod('GamesDirectory', 'FindById')
-  async findById(request: FindByIdRequest): Promise<FindByIdResponse> {
-    const record = await this.repository.findById(request);
+  @GrpcMethod('GamesDirectory', 'FindByAddress')
+  async findById(request: FindByAddressRequest): Promise<FindByAddressResponse> {
+    const record = await this.repository.findByAddress(request);
     return {
       record: {
         ...record,
