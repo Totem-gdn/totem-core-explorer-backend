@@ -84,7 +84,6 @@ export class TotemAssetLegacy implements OnApplicationBootstrap {
     this.contracts[assetType].on(
       'AssetLegacyRecord',
       (playerAddress: string, gameAddress: string, assetId: BigNumber, recordId: BigNumber, event: Event) => {
-        this.contractLogger[assetType].log(`event: AssetLegacyRecord txHash: ${event.transactionHash}`);
         this.createRecord(assetType, playerAddress, gameAddress, assetId, recordId, event);
         this.redis.set(this.storageKeys[assetType], event.blockNumber).catch(() => {
           this.contractLogger[assetType].error(`failed to store current event block number`);
@@ -124,6 +123,7 @@ export class TotemAssetLegacy implements OnApplicationBootstrap {
     recordId: BigNumber,
     event: Event,
   ) {
+    this.contractLogger[assetType].log(`event: AssetLegacyRecord txHash: ${event.transactionHash}`);
     try {
       const record: AssetLegacyRecord = await this.contracts[assetType].recordByIndex(recordId);
       await this.repository.create({

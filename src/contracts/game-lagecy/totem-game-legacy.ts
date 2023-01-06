@@ -46,7 +46,6 @@ export class TotemGameLegacy implements OnApplicationBootstrap {
     this.logger = new Logger(this.symbol);
     await this.fetchPreviousEvents();
     this.contract.on('GameLegacyRecord', (gameAddress: string, recordId: BigNumber, event: Event) => {
-      this.logger.log(`event: GameLegacyRecord recordId: ${recordId.toString()} txHash: ${event.transactionHash}`);
       this.createRecord(gameAddress, recordId, event);
       this.redis.set(this.storageKey, event.blockNumber).catch(() => {
         this.logger.error(`failed to store current event block number`);
@@ -78,6 +77,7 @@ export class TotemGameLegacy implements OnApplicationBootstrap {
   }
 
   private async createRecord(gameAddress: string, recordId: BigNumber, event: Event) {
+    this.logger.log(`event: GameLegacyRecord recordId: ${recordId.toString()} txHash: ${event.transactionHash}`);
     try {
       const record: GameLegacyRecord = await this.contract.recordByIndex(recordId);
       await this.repository.create({

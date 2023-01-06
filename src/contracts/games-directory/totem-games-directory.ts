@@ -46,14 +46,10 @@ export class TotemGamesDirectory implements OnApplicationBootstrap {
     this.logger = new Logger(this.symbol);
     await this.fetchPreviousEvents();
     this.contract.on('CreateGame', (gameAddress: string, ownerAddress: string, event: Event) => {
-      this.logger.log(
-        `event: CreateGame gameAddress: ${gameAddress} ownerAddress: ${ownerAddress} txHash: ${event.transactionHash}`,
-      );
       this.createGame(gameAddress, ownerAddress, event);
       this.redis.set(this.storageKey, event.blockNumber);
     });
     this.contract.on('UpdateGame', (gameAddress: string, event: Event) => {
-      this.logger.log(`event: UpdateGame gameAddress: ${gameAddress} txHash: ${event.transactionHash}`);
       this.updateGame(gameAddress, event);
       this.redis.set(this.storageKey, event.blockNumber);
     });
@@ -89,6 +85,9 @@ export class TotemGamesDirectory implements OnApplicationBootstrap {
   }
 
   private async createGame(gameAddress: string, ownerAddress: string, event: Event) {
+    this.logger.log(
+      `event: CreateGame gameAddress: ${gameAddress} ownerAddress: ${ownerAddress} txHash: ${event.transactionHash}`,
+    );
     try {
       const game: GameRecord = await this.contract.gameByAddress(gameAddress);
       await this.repository.create({
@@ -120,6 +119,7 @@ export class TotemGamesDirectory implements OnApplicationBootstrap {
   }
 
   private async updateGame(gameAddress: string, event: Event) {
+    this.logger.log(`event: UpdateGame gameAddress: ${gameAddress} txHash: ${event.transactionHash}`);
     try {
       const game: GameRecord = await this.contract.gameByAddress(gameAddress);
       await this.repository.update({
