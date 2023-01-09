@@ -14,7 +14,6 @@ import { withRetry } from '../../utils/helpers';
 export class TotemGameLegacy implements OnApplicationBootstrap {
   private logger = new Logger(TotemGameLegacy.name);
   private storageKey = 'contracts::gameLegacy::blockNumber';
-  private deployBlockNumber = '30575000';
   private contract: Contract;
   private symbol: string;
 
@@ -44,6 +43,8 @@ export class TotemGameLegacy implements OnApplicationBootstrap {
     this.contract = new Contract(address, TotemGameLegacyABI, this.providerService.getWallet());
     this.symbol = await this.contract.symbol();
     this.logger = new Logger(this.symbol);
+    this.logger.log(`contract address: ${address}`);
+    this.storageKey = `${this.symbol}::${address}::blockNumber`;
     await this.fetchPreviousEvents();
     this.contract.on('GameLegacyRecord', (gameAddress: string, recordId: BigNumber, event: Event) => {
       this.createRecord(gameAddress, recordId, event);
@@ -56,7 +57,7 @@ export class TotemGameLegacy implements OnApplicationBootstrap {
   private async fetchPreviousEvents() {
     let block = await this.redis
       .get(this.storageKey)
-      .then((blockNumber: string | null) => parseInt(blockNumber || this.deployBlockNumber, 10));
+      .then((blockNumber: string | null) => parseInt(blockNumber || '30575000', 10));
     let currentBlock = await this.providerService.getBlockNumber();
     const blocksPerPage = 2000;
     while (currentBlock > block) {

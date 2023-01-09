@@ -14,7 +14,6 @@ import { GamesDirectoryService } from '../../repository/games-directory';
 export class TotemGamesDirectory implements OnApplicationBootstrap {
   private logger = new Logger(TotemGamesDirectory.name);
   private storageKey = 'contracts::gamesDirectory::blockNumber';
-  private deployBlockNumber = '30575000';
   private contract: Contract;
   private symbol: string;
 
@@ -44,6 +43,8 @@ export class TotemGamesDirectory implements OnApplicationBootstrap {
     this.contract = new Contract(address, TotemGamesDirectoryABI, this.providerService.getWallet());
     this.symbol = await this.contract.symbol();
     this.logger = new Logger(this.symbol);
+    this.logger.log(`contract address: ${address}`);
+    this.storageKey = `${this.symbol}::${address}::blockNumber`;
     await this.fetchPreviousEvents();
     this.contract.on('CreateGame', (gameAddress: string, ownerAddress: string, event: Event) => {
       this.createGame(gameAddress, ownerAddress, event);
@@ -58,7 +59,7 @@ export class TotemGamesDirectory implements OnApplicationBootstrap {
   private async fetchPreviousEvents() {
     let block = await this.redis
       .get(this.storageKey)
-      .then((blockNumber: string | null) => parseInt(blockNumber || this.deployBlockNumber, 10));
+      .then((blockNumber: string | null) => parseInt(blockNumber || '30575000', 10));
     let currentBlock = await this.providerService.getBlockNumber();
     const blocksPerPage = 2000;
     while (currentBlock > block) {

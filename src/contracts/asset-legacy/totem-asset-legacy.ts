@@ -24,11 +24,6 @@ export class TotemAssetLegacy implements OnApplicationBootstrap {
     [AssetType.ITEM]: 'contracts::itemLegacy::blockNumber',
     [AssetType.GEM]: 'contracts::gemLegacy::blockNumber',
   };
-  private deployBlockNumber: Record<AssetType, string> = {
-    [AssetType.AVATAR]: '30575000',
-    [AssetType.ITEM]: '30575000',
-    [AssetType.GEM]: '30575000',
-  };
   private contracts: Record<AssetType, Contract | null> = {
     [AssetType.AVATAR]: null,
     [AssetType.ITEM]: null,
@@ -80,6 +75,8 @@ export class TotemAssetLegacy implements OnApplicationBootstrap {
     this.contracts[assetType] = new Contract(address, TotemAssetLegacyABI, this.providerService.getWallet());
     this.symbols[assetType] = await this.contracts[assetType].symbol();
     this.contractLogger[assetType] = new Logger(this.symbols[assetType]);
+    this.contractLogger[assetType].log(`contract address: ${address}`);
+    this.storageKeys[assetType] = `${this.symbols[assetType]}::${address}::blockNumber`;
     await this.fetchPreviousEvents(assetType);
     this.contracts[assetType].on(
       'AssetLegacyRecord',
@@ -95,7 +92,7 @@ export class TotemAssetLegacy implements OnApplicationBootstrap {
   private async fetchPreviousEvents(assetType: AssetType) {
     let block = await this.redis
       .get(this.storageKeys[assetType])
-      .then((blockNumber: string | null) => parseInt(blockNumber || this.deployBlockNumber[assetType], 10));
+      .then((blockNumber: string | null) => parseInt(blockNumber || '30575000', 10));
     let currentBlock = await this.providerService.getBlockNumber();
     const blocksPerPage = 2000;
     while (currentBlock > block) {
