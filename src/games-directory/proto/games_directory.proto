@@ -3,15 +3,16 @@ syntax = "proto3";
 package games_directory;
 
 enum GameStatus {
-  PENDING = 0;
-  ACCEPTED = 1;
-  REJECTED = 2;
-  BANNED = 3;
+  UNDEFINED = 0;
+  PENDING = 1;
+  ACCEPTED = 2;
+  REJECTED = 3;
+  BANNED = 4;
 }
 
 message GameRecord {
-  string record_id = 1;
-  string owner = 2;
+  string game_address = 1;
+  string owner_address = 2;
   string name = 3;
   string author = 4;
   string renderer = 5;
@@ -25,15 +26,16 @@ message GameRecord {
 }
 
 message CreateGameRequest {
-  string owner = 1;
-  string name = 2;
-  string author = 3;
-  string renderer = 4;
-  string avatar_filter = 5;
-  string item_filter = 6;
-  string gem_filter = 7;
-  string website = 8;
-  GameStatus status = 9;
+  string game_address = 1;
+  string owner_address = 2;
+  string name = 3;
+  string author = 4;
+  string renderer = 5;
+  string avatar_filter = 6;
+  string item_filter = 7;
+  string gem_filter = 8;
+  string website = 9;
+  GameStatus status = 10;
 }
 
 message CreateGameResponse {
@@ -41,16 +43,16 @@ message CreateGameResponse {
 }
 
 message UpdateGameRequest {
-  string record_id = 1;
-  optional string owner = 2;
-  optional string name = 3;
-  optional string author = 4;
-  optional string renderer = 5;
-  optional string avatar_filter = 6;
-  optional string item_filter = 7;
-  optional string gem_filter = 8;
-  optional string website = 9;
-  optional GameStatus status = 10;
+  string game_address = 1;
+  string owner_address = 2;
+  string name = 3;
+  string author = 4;
+  string renderer = 5;
+  string avatar_filter = 6;
+  string item_filter = 7;
+  string gem_filter = 8;
+  string website = 9;
+  GameStatus status = 10;
 }
 
 message UpdateGameResponse {
@@ -59,7 +61,8 @@ message UpdateGameResponse {
 
 message FindAllRequest {
   message Filters {
-    string owner = 1;
+    optional string owner_address = 1;
+    optional GameStatus status = 2;
   }
   Filters filters = 1;
   uint64 limit = 2;
@@ -81,9 +84,18 @@ message FindByIdResponse {
   GameRecord record = 1;
 }
 
+message FindByAddressRequest {
+  string game_address = 1;
+}
+
+message FindByAddressResponse {
+  GameRecord record = 1;
+}
+
 service GamesDirectory {
   rpc Create (CreateGameRequest) returns (CreateGameResponse);
   rpc Update (UpdateGameRequest) returns (UpdateGameResponse);
   rpc FindAll (FindAllRequest) returns (FindAllResponse);
   rpc FindById (FindByIdRequest) returns (FindByIdResponse);
+  rpc FindByAddress (FindByAddressRequest) returns (FindByAddressResponse);
 }

@@ -4,8 +4,8 @@ import { Long } from '@grpc/proto-loader';
 import { GameStatus } from '../utils/enums';
 
 export interface GameRecord {
-  recordId: string;
-  owner: string;
+  gameAddress: string;
+  ownerAddress: string;
   name: string;
   author: string;
   renderer: string;
@@ -19,7 +19,8 @@ export interface GameRecord {
 }
 
 export interface CreateGameRequest {
-  owner: string;
+  gameAddress: string;
+  ownerAddress: string;
   name: string;
   author: string;
   renderer: string;
@@ -35,16 +36,16 @@ export interface CreateGameResponse {
 }
 
 export interface UpdateGameRequest {
-  recordId: string;
-  owner?: string;
-  name?: string;
-  author?: string;
-  renderer?: string;
-  avatarFilter?: string;
-  itemFilter?: string;
-  gemFilter?: string;
-  website?: string;
-  status?: GameStatus;
+  gameAddress: string;
+  ownerAddress: string;
+  name: string;
+  author: string;
+  renderer: string;
+  avatarFilter: string;
+  itemFilter: string;
+  gemFilter: string;
+  website: string;
+  status: GameStatus;
 }
 
 export interface UpdateGameResponse {
@@ -53,7 +54,8 @@ export interface UpdateGameResponse {
 
 export interface FindAllRequest {
   filters: {
-    owner: string;
+    ownerAddress?: string;
+    status?: GameStatus;
   };
   limit: Long;
   offset: Long;
@@ -74,6 +76,14 @@ export interface FindByIdResponse {
   record: GameRecord;
 }
 
+export interface FindByAddressRequest {
+  gameAddress: string;
+}
+
+export interface FindByAddressResponse {
+  record: GameRecord;
+}
+
 export interface GamesDirectory {
   Create(request: CreateGameRequest): Observable<CreateGameResponse>;
 
@@ -82,4 +92,6 @@ export interface GamesDirectory {
   FindAll(request: FindAllRequest): Observable<FindAllResponse>;
 
   FindById(request: FindByIdRequest): Observable<FindByIdResponse>;
+
+  FindByAddress(request: FindByAddressRequest): Observable<FindByAddressResponse>;
 }

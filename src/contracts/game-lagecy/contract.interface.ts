@@ -1,12 +1,12 @@
 import { BigNumber } from 'ethers';
 
 export interface GameLegacyRecord {
-  gameId: BigNumber;
+  gameAddress: string;
   timestamp: BigNumber;
   data: string;
 }
 
 export interface CreateGameLegacy {
-  gameId: string;
+  gameAddress: string;
   data: string;
 }

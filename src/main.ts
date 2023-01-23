@@ -5,8 +5,10 @@ import { ConfigService } from '@nestjs/config';
 import { GrpcOptions, MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 import { AppModule } from './app.module';
+import { AppVersion } from './app.version';
 
 async function bootstrap() {
+  await AppVersion();
   const app = await NestFactory.create(AppModule);
   const config = app.get(ConfigService);
   app.enableShutdownHooks();
