@@ -22,6 +22,8 @@ spec:
               value:
             - name: MONGODB_DATABASE
               value:
+            - name: PAYMENT_API_URL
+              value:
             - name: PROVIDER_URL
               value:
             - name: AVATAR_LEGACY_CONTRACT
@@ -37,7 +39,7 @@ spec:
           envFrom:
             - secretRef:
                 name: core-explorer-backend
-          image: 
+          image:
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3

@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+package payment_keys;
+
+enum PaymentKeyStatus {
+  RESERVED = 0;
+  IN_TRANSACTION = 1;
+  CLAIMED = 2;
+}
+
+enum AssetType {
+  AVATAR = 0;
+  ITEM = 1;
+  GEM = 2;
+}
+
+message CreatePaymentKeysRequest {
+  string api_key = 1;
+  AssetType asset_type = 2;
+  uint64 amount = 3;
+}
+
+message ClaimPaymentKeyRequest {
+  string api_key = 1;
+  string player_address = 2;
+  AssetType asset_type = 3;
+}
+
+message ClaimPaymentKeyResponse {
+  string tx_hash = 1;
+}
+
+message PaymentKeysStatusRequest {
+  string api_key = 1;
+  AssetType asset_type = 2;
+  PaymentKeyStatus status = 3;
+}
+
+message PaymentKeysStatusResponse {
+  uint64 amount = 1;
+}
+
+service PaymentKeys {
+  rpc Create (CreatePaymentKeysRequest) returns (google.protobuf.Empty);
+  rpc Claim (ClaimPaymentKeyRequest) returns (ClaimPaymentKeyResponse);
+  rpc Status (PaymentKeysStatusRequest) returns (PaymentKeysStatusResponse);
+}

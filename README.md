@@ -17,6 +17,7 @@ storing data from contracts for faster and more flexible access.
     REDIS_URL=redis://127.0.0.1:6379/0
     MONGODB_URI=mongodb://user:pass@127.0.0.1:27017
     MONGODB_DATABASE=explorer-storage
+    PAYMENT_API_URL=https://payment-api.com
     PROVIDER_URL=https://polygon-mumbai.chainstacklabs.com
     PROVIDER_PRIVATE_KEY=
     AVATAR_LEGACY_CONTRACT=

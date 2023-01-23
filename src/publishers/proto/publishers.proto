@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package publishers;
+
+message CreatePublisherRequest {
+  string name = 1;
+  string webhook_url = 2;
+}
+
+message CreatePublisherResponse {
+  string api_key = 1;
+}
+
+service Publishers {
+  rpc Create(CreatePublisherRequest) returns (CreatePublisherResponse);
+}

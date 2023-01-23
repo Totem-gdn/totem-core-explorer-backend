@@ -16,10 +16,10 @@ import { GameLegacyService } from '../repository/game-legacy';
 import { TotemGameLegacy } from '../contracts/game-lagecy/totem-game-legacy';
 
 @Controller()
+@UseFilters(new UnhandledExceptionFilter())
 export class GameLegacyController {
   constructor(private repository: GameLegacyService, private contract: TotemGameLegacy) {}
 
-  @UseFilters(UnhandledExceptionFilter)
   @UsePipes(new RpcValidationPipe(true))
   @GrpcMethod('GameLegacy', 'Create')
   async create(request: CreateGameLegacyRequest): Promise<CreateGameLegacyResponse> {
@@ -27,7 +27,6 @@ export class GameLegacyController {
     return { txHash };
   }
 
-  @UseFilters(UnhandledExceptionFilter)
   @UsePipes(new RpcValidationPipe(true))
   @GrpcMethod('GameLegacy', 'FindAll')
   async findAll(request: FindAllRequest): Promise<FindAllResponse> {
@@ -47,7 +46,6 @@ export class GameLegacyController {
     };
   }
 
-  @UseFilters(UnhandledExceptionFilter)
   @UsePipes(new RpcValidationPipe(true))
   @GrpcMethod('GameLegacy', 'FindById')
   async findById(request: FindByIdRequest): Promise<FindByIdResponse> {

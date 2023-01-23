@@ -1,4 +1,4 @@
-import { BadRequestException, Controller, UseFilters, UsePipes } from '@nestjs/common';
+import { ConflictException, Controller, UseFilters, UsePipes } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import { Long } from '@grpc/proto-loader';
 
@@ -18,22 +18,21 @@ import { GamesDirectoryService } from '../repository/games-directory';
 import { TotemGamesDirectory } from '../contracts/games-directory/totem-games-directory';
 
 @Controller()
+@UseFilters(new UnhandledExceptionFilter())
 export class GamesDirectoryController {
   constructor(private repository: GamesDirectoryService, private contract: TotemGamesDirectory) {}
 
-  @UseFilters(UnhandledExceptionFilter)
   @UsePipes(new RpcValidationPipe(true))
   @GrpcMethod('GamesDirectory', 'Create')
   async create(request: CreateGameRequest): Promise<CreateGameResponse> {
     const isExists = await this.repository.isExists(request.gameAddress);
     if (isExists) {
-      throw new BadRequestException('game address is already exists');
+      throw new ConflictException('game address is already exists');
     }
     const txHash = await this.contract.create(request);
     return { txHash };
   }
 
-  @UseFilters(UnhandledExceptionFilter)
   @UsePipes(new RpcValidationPipe(true))
   @GrpcMethod('GamesDirectory', 'Update')
   async update(request: UpdateGameRequest): Promise<UpdateGameResponse> {
@@ -41,7 +40,6 @@ export class GamesDirectoryController {
     return { txHash };
   }
 
-  @UseFilters(UnhandledExceptionFilter)
   @UsePipes(new RpcValidationPipe(true))
   @GrpcMethod('GamesDirectory', 'FindAll')
   async findAll(request: FindAllRequest): Promise<FindAllResponse> {
@@ -62,7 +60,6 @@ export class GamesDirectoryController {
     };
   }
 
-  @UseFilters(UnhandledExceptionFilter)
   @UsePipes(new RpcValidationPipe(true))
   @GrpcMethod('GamesDirectory', 'FindByAddress')
   async findById(request: FindByAddressRequest): Promise<FindByAddressResponse> {
