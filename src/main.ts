@@ -16,12 +16,14 @@ async function bootstrap() {
     transport: Transport.GRPC,
     options: {
       url: config.get<string>('GRPC_URL'),
-      package: ['grpc.health.v1', 'asset_legacy', 'game_legacy', 'games_directory'],
+      package: ['grpc.health.v1', 'asset_legacy', 'game_legacy', 'games_directory', 'publishers', 'payment_keys'],
       protoPath: [
         join(__dirname, 'health', 'proto', 'health.proto'),
         join(__dirname, 'asset-legacy', 'proto', 'asset_legacy.proto'),
         join(__dirname, 'game-legacy', 'proto', 'game_legacy.proto'),
         join(__dirname, 'games-directory', 'proto', 'games_directory.proto'),
+        join(__dirname, 'publishers', 'proto', 'publishers.proto'),
+        join(__dirname, 'payment-keys', 'proto', 'payment_keys.proto'),
       ],
     },
   });

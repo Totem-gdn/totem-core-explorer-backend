@@ -16,10 +16,10 @@ import { AssetLegacyService } from '../repository/asset-legacy';
 import { TotemAssetLegacy } from '../contracts/asset-legacy/totem-asset-legacy';
 
 @Controller()
+@UseFilters(new UnhandledExceptionFilter())
 export class AssetLegacyController {
   constructor(private repository: AssetLegacyService, private contract: TotemAssetLegacy) {}
 
-  @UseFilters(UnhandledExceptionFilter)
   @UsePipes(new RpcValidationPipe(true))
   @GrpcMethod('AssetLegacy', 'Create')
   async create(request: CreateAssetLegacyRequest): Promise<CreateAssetLegacyResponse> {
@@ -28,7 +28,6 @@ export class AssetLegacyController {
     return { txHash };
   }
 
-  @UseFilters(UnhandledExceptionFilter)
   @UsePipes(new RpcValidationPipe(true))
   @GrpcMethod('AssetLegacy', 'FindAll')
   async findAll(request: FindAllRequest): Promise<FindAllResponse> {
@@ -49,7 +48,6 @@ export class AssetLegacyController {
     };
   }
 
-  @UseFilters(UnhandledExceptionFilter)
   @UsePipes(new RpcValidationPipe(true))
   @GrpcMethod('AssetLegacy', 'FindById')
   async findById(request: FindByIdRequest): Promise<FindByIdResponse> {

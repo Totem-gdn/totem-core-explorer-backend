@@ -17,6 +17,7 @@ storing data from contracts for faster and more flexible access.
     REDIS_URL=redis://127.0.0.1:6379/0
     MONGODB_URI=mongodb://user:pass@127.0.0.1:27017
     MONGODB_DATABASE=explorer-storage
+    PAYMENT_API_URL=https://payment-api.com
     PROVIDER_URL=https://polygon-mumbai.chainstacklabs.com
     PROVIDER_PRIVATE_KEY=
     AVATAR_LEGACY_CONTRACT=
@@ -29,6 +30,7 @@ storing data from contracts for faster and more flexible access.
    `*_CONTRACT` variables are the addresses of deployed smart contracts.    
    Smart contracts can be found in the [Totem Smart Contracts](https://github.com/Totem-gdn/totem-smart-contracts)
    repository.
+   `PAYMENT_API_URL` is URL to [Payment Service](https://github.com/Totem-gdn/totem-payment-service)
 4. Run service in development mode:
    ```bash
    npm run start:dev
