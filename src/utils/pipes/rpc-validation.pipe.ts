@@ -1,27 +1,21 @@
-import { HttpStatus, ValidationPipe } from '@nestjs/common';
-import { RpcException } from '@nestjs/microservices';
+import { HttpException, HttpStatus, ValidationPipe } from '@nestjs/common';
 import { ValidationError } from 'class-validator';
-
-import { RpcError } from '../errors';
 
 export class RpcValidationPipe extends ValidationPipe {
   constructor(transform: boolean) {
     super({
       transform,
       exceptionFactory: (errors: ValidationError[]) => {
-        const rpcErrors: RpcError = {
-          status: HttpStatus.BAD_REQUEST,
-          errors: {},
-        };
-        for (const propertyKey in errors) {
-          const error = errors[propertyKey];
+        const response: Record<string, any> = {};
+        for (const property in errors) {
+          const error = errors[property];
           const messages = [];
-          for (const errorKey in error.constraints) {
-            messages.push(error.constraints[errorKey]);
+          for (const type in error.constraints) {
+            messages.push(error.constraints[type]);
           }
-          rpcErrors.errors[error.property] = messages;
+          response[property] = messages;
         }
-        return new RpcException(JSON.stringify(rpcErrors));
+        return new HttpException({ details: response }, HttpStatus.BAD_REQUEST);
       },
     });
   }

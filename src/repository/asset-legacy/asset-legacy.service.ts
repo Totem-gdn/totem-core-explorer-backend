@@ -3,13 +3,13 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import {
-  ItemLegacy,
-  ItemLegacyDocument,
   AvatarLegacy,
   AvatarLegacyDocument,
   GemLegacy,
   GemLegacyDocument,
-} from '../schemas';
+  ItemLegacy,
+  ItemLegacyDocument,
+} from './schemas';
 import {
   AssetLegacyRecord,
   CreateAssetLegacy,
@@ -26,30 +26,6 @@ export class AssetLegacyService {
     @InjectModel(ItemLegacy.name) private assetLegacyModel: Model<ItemLegacyDocument>,
     @InjectModel(GemLegacy.name) private gemLegacyModel: Model<GemLegacyDocument>,
   ) {}
-
-  private getModel(assetType: AssetType): Model<AvatarLegacyDocument | ItemLegacyDocument | GemLegacyDocument> {
-    switch (assetType) {
-      case AssetType.AVATAR:
-        return this.avatarLegacyModel;
-      case AssetType.ITEM:
-        return this.assetLegacyModel;
-      case AssetType.GEM:
-        return this.gemLegacyModel;
-      default:
-        throw new Error(`invalid asset type ${assetType}`);
-    }
-  }
-
-  private docToRecord(doc: AvatarLegacyDocument | ItemLegacyDocument | GemLegacyDocument): AssetLegacyRecord {
-    return {
-      recordId: doc._id,
-      playerAddress: doc.playerAddress,
-      assetId: doc.assetId,
-      gameAddress: doc.gameAddress,
-      timestamp: doc.timestamp,
-      data: doc.data,
-    };
-  }
 
   async create(request: CreateAssetLegacy) {
     const { assetType, recordId, ...record } = request;
@@ -77,7 +53,7 @@ export class AssetLegacyService {
       total,
       limit,
       offset,
-      results: results.length > 0 ? results.map(this.docToRecord) : [],
+      results: results.length > 0 ? results.map((doc) => doc.toObject()) : [],
     };
   }
 
@@ -87,6 +63,19 @@ export class AssetLegacyService {
     if (!record) {
       throw new NotFoundException();
     }
-    return this.docToRecord(record);
+    return record.toObject();
+  }
+
+  private getModel(assetType: AssetType): Model<AvatarLegacyDocument | ItemLegacyDocument | GemLegacyDocument> {
+    switch (assetType) {
+      case AssetType.AVATAR:
+        return this.avatarLegacyModel;
+      case AssetType.ITEM:
+        return this.assetLegacyModel;
+      case AssetType.GEM:
+        return this.gemLegacyModel;
+      default:
+        throw new Error(`invalid asset type ${assetType}`);
+    }
   }
 }

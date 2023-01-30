@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-import { GameLegacy, GameLegacyDocument } from '../schemas';
+import { GameLegacy, GameLegacyDocument } from './schemas';
 import {
   CreateGameLegacy,
   FindAllQuery,
@@ -14,15 +14,6 @@ import {
 @Injectable()
 export class GameLegacyService {
   constructor(@InjectModel(GameLegacy.name) private model: Model<GameLegacyDocument>) {}
-
-  private docToRecord(doc: GameLegacyDocument): GameLegacyRecord {
-    return {
-      recordId: doc._id,
-      gameAddress: doc.gameAddress,
-      timestamp: doc.timestamp,
-      data: doc.data,
-    };
-  }
 
   async create(request: CreateGameLegacy) {
     const { recordId, ...record } = request;
@@ -48,7 +39,7 @@ export class GameLegacyService {
       total,
       limit,
       offset,
-      results: results?.length > 0 ? results.map(this.docToRecord) : [],
+      results: results?.length > 0 ? results.map((doc) => doc.toObject()) : [],
     };
   }
 
@@ -57,6 +48,6 @@ export class GameLegacyService {
     if (!record) {
       throw new NotFoundException();
     }
-    return this.docToRecord(record);
+    return record.toObject();
   }
 }
