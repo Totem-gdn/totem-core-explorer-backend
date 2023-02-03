@@ -8,6 +8,10 @@ image:
 fullnameOverride: "totem-core-explorer-backend-dev"
 containerPort: 50051
 
+ingress:
+  enabled: false
+  annotations:
+    {}
 service:
   type: NodePort
   port: 50051
