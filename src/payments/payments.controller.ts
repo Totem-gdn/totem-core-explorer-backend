@@ -4,7 +4,11 @@ import { PaymentsService } from '../repository/payments/payments.service';
 
 import { UnhandledExceptionFilter } from '../utils/filters';
 import { RpcValidationPipe } from '../utils/pipes';
-import { CreateWithpaperPaymentLinkRequest, CreateWithpaperPaymentLinkResponse } from './payments.interface';
+import {
+  CreateWithpaperPaymentLinkRequest,
+  CreateWithpaperPaymentLinkResponse,
+  ProcessWithpaperWebhookRequest,
+} from './payments.interface';
 
 @Controller()
 @UseFilters(new UnhandledExceptionFilter())
@@ -17,5 +21,11 @@ export class PaymentsController {
     request: CreateWithpaperPaymentLinkRequest,
   ): Promise<CreateWithpaperPaymentLinkResponse> {
     return await this.repository.createWithpaperPaymentLink(request);
+  }
+
+  @UsePipes(new RpcValidationPipe(true))
+  @GrpcMethod('Payments', 'ProcessWithpaperWebhook')
+  async processWithpaperWebhook(request: ProcessWithpaperWebhookRequest): Promise<void> {
+    return await this.repository.processWithpaperWebhook(request);
   }
 }

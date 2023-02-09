@@ -16,8 +16,8 @@ export class Order {
   @Prop({ type: SchemaTypes.Number, required: true })
   assetType: AssetType;
 
-  @Prop({ type: SchemaTypes.String, required: true })
-  status: string;
+  @Prop({ type: SchemaTypes.Number, required: true })
+  status: number;
 
   @Prop({ type: SchemaTypes.String, required: true })
   price: string;
@@ -25,8 +25,8 @@ export class Order {
   @Prop({ type: SchemaTypes.String, default: () => '' })
   txHash: string;
 
-  @Prop({ type: SchemaTypes.String })
-  paymentSystem: string;
+  @Prop({ type: SchemaTypes.Number })
+  paymentSystem: number;
 }
 
 export type OrderDocument = Order & Document & DocumentTimestamps;

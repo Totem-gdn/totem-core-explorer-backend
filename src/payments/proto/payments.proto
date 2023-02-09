@@ -19,6 +19,14 @@ message CreateWithpaperPaymentLinkResponse {
   string url = 1;
 }
 
+message ProcessWithpaperWebhookRequest {
+  string txHash = 0;
+  string orderId = 1;
+  string event = 2;
+}
+
 service Payments {
   rpc CreateWithpaperPaymentLink (CreateWithpaperPaymentLinkRequest) returns (CreateWithpaperPaymentLinkResponse);
+
+  rpc ProcessWithpaperWebhook (ProcessWithpaperWebhookRequest) returns (google.protobuf.Empty);
 }

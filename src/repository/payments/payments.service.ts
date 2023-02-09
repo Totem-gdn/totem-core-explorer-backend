@@ -13,6 +13,7 @@ import {
   PaymentInfoResponse,
 } from './payments.interface';
 import { Order, OrderDocument } from './schemas/orders';
+import { ProcessWithpaperWebhookRequest } from 'src/payments/payments.interface';
 
 @Injectable()
 export class PaymentsService {
@@ -26,6 +27,7 @@ export class PaymentsService {
   ) {
     this.paymentAPI = new URL(configService.get<string>('PAYMENT_API_URL'));
   }
+
   async createWithpaperPaymentLink(
     request: CreateWithpaperPaymentLinkRequest,
   ): Promise<CreateWithpaperPaymentLinkResponse> {
@@ -173,5 +175,20 @@ export class PaymentsService {
     const length = DNALength[assetType];
     const tokenURIBuffer = webcrypto.getRandomValues(new Uint32Array(length));
     return Buffer.from(tokenURIBuffer.buffer).toString('hex');
+  }
+
+  async processWithpaperWebhook(request: ProcessWithpaperWebhookRequest): Promise<void> {
+    const order = await this.orderModel.findById(request.orderId);
+
+    if (order) {
+      if (request.event === 'transfer:succeeded' && request.txHash) {
+        order.set({ status: PaymentStatuses.Completed, txHash: request.txHash });
+      }
+      if (request.event === 'payment:succeeded') {
+        order.set({ status: PaymentStatuses.Processing });
+      }
+
+      await order.save();
+    }
   }
 }
