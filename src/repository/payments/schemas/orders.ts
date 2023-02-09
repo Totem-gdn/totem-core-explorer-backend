@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { SchemaTypes } from 'mongoose';
 import { DocumentTimestamps } from '../../utils/document';
-import { AssetType } from '../../../utils/enums';
+import { AssetType, PaymentStatuses, PaymentSystem } from '../../../utils/enums';
 
 @Schema({
   autoCreate: true,
@@ -17,7 +17,7 @@ export class Order {
   assetType: AssetType;
 
   @Prop({ type: SchemaTypes.Number, required: true })
-  status: number;
+  status: PaymentStatuses;
 
   @Prop({ type: SchemaTypes.String, required: true })
   price: string;
@@ -26,7 +26,7 @@ export class Order {
   txHash: string;
 
   @Prop({ type: SchemaTypes.Number })
-  paymentSystem: number;
+  paymentSystem: PaymentSystem;
 }
 
 export type OrderDocument = Order & Document & DocumentTimestamps;
