@@ -16,6 +16,8 @@ import {
 import { Publisher, PublisherSchema, PublishersService } from './publishers';
 import { GameLegacy, GameLegacySchema, GameLegacyService } from './game-legacy';
 import { PaymentKey, PaymentKeySchema, PaymentKeysService } from './payment-keys';
+import { PaymentsService } from './payments/payments.service';
+import { Order, OrderSchema } from './payments/schemas/orders';
 
 @Module({
   imports: [
@@ -29,9 +31,24 @@ import { PaymentKey, PaymentKeySchema, PaymentKeysService } from './payment-keys
       { name: GamesDirectory.name, schema: GamesDirectorySchema },
       { name: Publisher.name, schema: PublisherSchema },
       { name: PaymentKey.name, schema: PaymentKeySchema },
+      { name: Order.name, schema: OrderSchema },
     ]),
   ],
-  providers: [AssetLegacyService, GameLegacyService, GamesDirectoryService, PublishersService, PaymentKeysService],
-  exports: [AssetLegacyService, GameLegacyService, GamesDirectoryService, PublishersService, PaymentKeysService],
+  providers: [
+    AssetLegacyService,
+    GameLegacyService,
+    GamesDirectoryService,
+    PublishersService,
+    PaymentKeysService,
+    PaymentsService,
+  ],
+  exports: [
+    AssetLegacyService,
+    GameLegacyService,
+    GamesDirectoryService,
+    PublishersService,
+    PaymentKeysService,
+    PaymentsService,
+  ],
 })
 export class RepositoryModule {}

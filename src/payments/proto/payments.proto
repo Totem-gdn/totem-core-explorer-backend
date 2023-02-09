@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package payments;
+
+enum AssetType {
+  AVATAR = 0;
+  ITEM = 1;
+  GEM = 2;
+}
+
+message CreateWithpaperPaymentLinkRequest {
+  AssetType asset_type = 0;
+  string success_url = 1;
+  string ownerAddress = 2;
+}
+
+message CreateWithpaperPaymentLinkResponse {
+  string order_id = 0;
+  string url = 1;
+}
+
+service Payments {
+  rpc CreateWithpaperPaymentLink (CreateWithpaperPaymentLinkRequest) returns (CreateWithpaperPaymentLinkResponse);
+}
