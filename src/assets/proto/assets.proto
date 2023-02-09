@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package assets;
+
+message ClaimAssetResponse {
+  string txHash = 0;
+}
+
+message ClaimAssetRequest {
+  AssetType assetType = 1;
+  string ownerAddress = 2;
+}
+
+service Assets {
+  rpc ClaimAsset (ClaimAssetRequest) returns (ClaimAssetResponse);
+}
