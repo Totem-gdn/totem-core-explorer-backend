@@ -134,7 +134,7 @@ export class PaymentsService {
           orderId: orderId,
         },
         mintMethod: {
-          name: 'safeMint',
+          name: 'safeMint(address,string)',
           args: {
             to: '$WALLET',
             uri,
