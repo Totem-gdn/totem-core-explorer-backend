@@ -12,8 +12,8 @@ import {
   CreateWithpaperPaymentLinkResponse,
   PaymentInfoResponse,
 } from './payments.interface';
-import { Order, OrderDocument } from './schemas/orders';
-import { ProcessWithpaperWebhookRequest } from 'src/payments/payments.interface';
+import { Order, OrderDocument } from './schemas';
+import { ProcessWithpaperWebhookRequest } from '../../payments/payments.interface';
 
 @Injectable()
 export class PaymentsService {
@@ -94,7 +94,7 @@ export class PaymentsService {
   private async generateWithpaperPaymentLink(
     assetType: AssetType,
     ownerAddress: string,
-    price: string,
+    _price: string,
     orderId: string,
     successUrl: string,
     uri: string,

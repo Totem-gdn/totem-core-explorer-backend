@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import "google/protobuf/empty.proto";
+
 package payments;
 
 enum AssetType {
@@ -9,20 +11,20 @@ enum AssetType {
 }
 
 message CreateWithpaperPaymentLinkRequest {
-  AssetType asset_type = 0;
-  string success_url = 1;
-  string ownerAddress = 2;
+  AssetType asset_type = 1;
+  string success_url = 2;
+  string ownerAddress = 3;
 }
 
 message CreateWithpaperPaymentLinkResponse {
-  string order_id = 0;
-  string url = 1;
+  string order_id = 1;
+  string url = 2;
 }
 
 message ProcessWithpaperWebhookRequest {
-  string txHash = 0;
-  string orderId = 1;
-  string event = 2;
+  string txHash = 1;
+  string orderId = 2;
+  string event = 3;
 }
 
 service Payments {

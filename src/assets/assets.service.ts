@@ -1,10 +1,11 @@
 import { HttpException, HttpStatus, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
-import { catchError, firstValueFrom } from 'rxjs';
-import { AssetTypeKey } from '../../utils/enums';
 import { AxiosError } from 'axios';
-import { ClaimAssetRequest, ClaimAssetResponse } from 'src/assets/assets.interface';
+import { catchError, firstValueFrom } from 'rxjs';
+
+import { AssetTypeKey } from '../utils/enums';
+import { ClaimAssetRequest, ClaimAssetResponse } from './assets.interface';
 
 @Injectable()
 export class AssetsService {

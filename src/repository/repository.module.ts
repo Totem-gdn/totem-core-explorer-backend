@@ -16,9 +16,7 @@ import {
 import { Publisher, PublisherSchema, PublishersService } from './publishers';
 import { GameLegacy, GameLegacySchema, GameLegacyService } from './game-legacy';
 import { PaymentKey, PaymentKeySchema, PaymentKeysService } from './payment-keys';
-import { AssetsService } from './assets';
-import { PaymentsService } from './payments/payments.service';
-import { Order, OrderSchema } from './payments/schemas/orders';
+import { PaymentsService, Order, OrderSchema } from './payments';
 
 @Module({
   imports: [
@@ -41,7 +39,6 @@ import { Order, OrderSchema } from './payments/schemas/orders';
     GamesDirectoryService,
     PublishersService,
     PaymentKeysService,
-    AssetsService,
     PaymentsService,
   ],
   exports: [
@@ -50,7 +47,6 @@ import { Order, OrderSchema } from './payments/schemas/orders';
     GamesDirectoryService,
     PublishersService,
     PaymentKeysService,
-    AssetsService,
     PaymentsService,
   ],
 })
