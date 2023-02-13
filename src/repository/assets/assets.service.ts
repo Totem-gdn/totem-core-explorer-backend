@@ -20,7 +20,7 @@ export class AssetsService {
       const axiosResponse = await firstValueFrom(
         this.httpService
           .post<{ txHash: string }>(new URL('payments/claim', this.paymentAPI).toString(), {
-            paymentKey: new Date().getTime().toString(),
+            paymentKey: crypto.randomUUID(),
             publisher: 'TOTEM-AUTH',
             player: request.ownerAddress,
             assetType: AssetTypeKey[request.assetType],
