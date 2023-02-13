@@ -2,13 +2,19 @@ syntax = "proto3";
 
 package assets;
 
-message ClaimAssetResponse {
-  string txHash = 0;
+enum AssetType {
+  AVATAR = 0;
+  ITEM = 1;
+  GEM = 2;
 }
 
 message ClaimAssetRequest {
-  AssetType assetType = 1;
-  string ownerAddress = 2;
+  string ownerAddress = 1;
+  AssetType assetType = 2;
+}
+
+message ClaimAssetResponse {
+  string txHash = 1;
 }
 
 service Assets {
