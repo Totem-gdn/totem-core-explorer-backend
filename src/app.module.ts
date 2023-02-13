@@ -11,6 +11,8 @@ import { GameLegacyModule } from './game-legacy/game-legacy.module';
 import { GamesDirectoryModule } from './games-directory/games-directory.module';
 import { PublishersModule } from './publishers/publishers.module';
 import { PaymentKeysModule } from './payment-keys/payment-keys.module';
+import { AssetsModule } from './assets/assets.module';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -40,6 +42,8 @@ import { PaymentKeysModule } from './payment-keys/payment-keys.module';
     GamesDirectoryModule,
     PublishersModule,
     PaymentKeysModule,
+    AssetsModule,
+    PaymentsModule,
   ],
 })
 export class AppModule {}

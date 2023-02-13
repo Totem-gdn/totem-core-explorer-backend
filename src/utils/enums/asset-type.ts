@@ -9,3 +9,9 @@ export const AssetTypeKey = {
   [AssetType.ITEM]: 'item',
   [AssetType.GEM]: 'gem',
 };
+
+export const DNALength = {
+  [AssetType.AVATAR]: 32,
+  [AssetType.ITEM]: 16,
+  [AssetType.GEM]: 8,
+};
