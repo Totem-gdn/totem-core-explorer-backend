@@ -23,6 +23,7 @@ async function bootstrap() {
         'games_directory',
         'publishers',
         'payment_keys',
+        'assets',
         'payments',
       ],
       protoPath: [
@@ -32,6 +33,7 @@ async function bootstrap() {
         join(__dirname, 'games-directory', 'proto', 'games_directory.proto'),
         join(__dirname, 'publishers', 'proto', 'publishers.proto'),
         join(__dirname, 'payment-keys', 'proto', 'payment_keys.proto'),
+        join(__dirname, 'assets', 'proto', 'assets.proto'),
         join(__dirname, 'payments', 'proto', 'payments.proto'),
       ],
     },
