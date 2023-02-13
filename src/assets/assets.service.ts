@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { HttpException, HttpStatus, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
@@ -21,7 +22,7 @@ export class AssetsService {
       const axiosResponse = await firstValueFrom(
         this.httpService
           .post<{ txHash: string }>(new URL('payments/claim', this.paymentAPI).toString(), {
-            paymentKey: crypto.randomUUID(),
+            paymentKey: randomUUID(),
             publisher: 'TOTEM-AUTH',
             player: request.ownerAddress,
             assetType: AssetTypeKey[request.assetType],
