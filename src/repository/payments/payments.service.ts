@@ -111,6 +111,18 @@ export class PaymentsService {
     url.search = search_params.toString();
 
     try {
+      let contractId, spender;
+      if (parsedAssetType === 'avatar') {
+        contractId = this.configService.get<string>('WITHPAPER_AVATAR_CONTRACT_ID');
+        spender = this.configService.get<string>('WITHPAPER_AVATAR_SPENDER_ADDRESS');
+      } else if (parsedAssetType === 'item') {
+        contractId = this.configService.get<string>('WITHPAPER_ITEM_CONTRACT_ID');
+        spender = this.configService.get<string>('WITHPAPER_ITEM_SPENDER_ADDRESS');
+      } else {
+        contractId = this.configService.get<string>('WITHPAPER_GEM_CONTRACT_ID');
+        spender = this.configService.get<string>('WITHPAPER_GEM_SPENDER_ADDRESS');
+      }
+
       const body = {
         expiresInMinutes: 15,
         limitPerTransaction: 1,
@@ -122,7 +134,7 @@ export class PaymentsService {
           orderId: orderId,
         },
         mintMethod: {
-          name: 'mint',
+          name: 'safeMint',
           args: {
             to: '$WALLET',
             uri,
@@ -130,6 +142,7 @@ export class PaymentsService {
           payment: {
             value: '0.001 * $QUANTITY',
             currency: 'USDC',
+            spender,
           },
         },
         feeBearer: 'BUYER',
@@ -141,7 +154,7 @@ export class PaymentsService {
         hidePayWithIdeal: true,
         sendEmailOnTransferSucceeded: false,
         usePaperKey: false,
-        contractId: this.configService.get<string>('WITHPAPER_CONTRACT_ID'),
+        contractId,
         title: `Totem Asset ${parsedAssetType}`,
         walletAddress: ownerAddress,
         successCallbackUrl: url.toString(),
