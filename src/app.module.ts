@@ -12,7 +12,7 @@ import { GamesDirectoryModule } from './games-directory/games-directory.module';
 import { PublishersModule } from './publishers/publishers.module';
 import { PaymentKeysModule } from './payment-keys/payment-keys.module';
 import { AssetsModule } from './assets/assets.module';
-import { PaymentsModule } from './payments/payments.module';
+import { WithpaperModule } from './payments/withpaper/withpaper.module';
 
 @Module({
   imports: [
@@ -43,7 +43,7 @@ import { PaymentsModule } from './payments/payments.module';
     PublishersModule,
     PaymentKeysModule,
     AssetsModule,
-    PaymentsModule,
+    WithpaperModule,
   ],
 })
 export class AppModule {}

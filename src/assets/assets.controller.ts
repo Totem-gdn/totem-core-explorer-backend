@@ -3,20 +3,33 @@ import { GrpcMethod } from '@nestjs/microservices';
 
 import { UnhandledExceptionFilter } from '../utils/filters';
 import { RpcValidationPipe } from '../utils/pipes';
-import { AssetsService } from './assets.service';
-import { ClaimAssetRequest, ClaimAssetResponse } from './assets.interface';
+import { ClaimRequest, ClaimResponse, CreateRequest, UpdateRequest } from './assets.interface';
+import { AssetsService } from '../repository/assets';
+import { TotemAsset } from '../contracts/asset/totem-asset';
 
 @Controller()
 @UseFilters(new UnhandledExceptionFilter())
 export class AssetsController {
-  constructor(private service: AssetsService) {}
+  constructor(private readonly repository: AssetsService, private readonly contract: TotemAsset) {}
 
   @UsePipes(new RpcValidationPipe(true))
-  @GrpcMethod('Assets', 'ClaimAsset')
-  async createPaymentKeys(request: ClaimAssetRequest): Promise<ClaimAssetResponse> {
-    return await this.service.claimAsset({
-      ownerAddress: request.ownerAddress,
-      assetType: request.assetType,
-    });
+  @GrpcMethod('Assets', 'Create')
+  async create(request: CreateRequest) {
+    const { assetType, ...assetData } = request;
+    await this.repository.create(assetType, assetData);
+  }
+
+  @UsePipes(new RpcValidationPipe(true))
+  @GrpcMethod('Assets', 'Update')
+  async update(request: UpdateRequest) {
+    const { assetType, ...assetData } = request;
+    await this.repository.update(assetType, assetData);
+  }
+
+  @UsePipes(new RpcValidationPipe(true))
+  @GrpcMethod('Assets', 'Claim')
+  async claimAsset(request: ClaimRequest): Promise<ClaimResponse> {
+    const txHash = await this.contract.claim(request.assetType, request.ownerAddress);
+    return { txHash };
   }
 }

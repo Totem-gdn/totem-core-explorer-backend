@@ -1,14 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { HttpModule } from '@nestjs/axios';
 
 import { RepositoryModule } from '../repository/repository.module';
+import { ContractsModule } from '../contracts/contracts.module';
 import { AssetsController } from './assets.controller';
-import { AssetsService } from './assets.service';
 
 @Module({
-  imports: [ConfigModule, HttpModule, RepositoryModule],
+  imports: [ConfigModule, RepositoryModule, ContractsModule],
   controllers: [AssetsController],
-  providers: [AssetsService],
+  providers: [],
 })
 export class AssetsModule {}

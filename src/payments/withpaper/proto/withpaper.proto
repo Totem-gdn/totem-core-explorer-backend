@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package withpaper;
+
+import "google/protobuf/empty.proto";
+
+enum AssetType {
+  AVATAR = 0;
+  ITEM = 1;
+  GEM = 2;
+}
+
+message CreatePaymentLinkRequest {
+  AssetType asset_type = 1;
+  string success_url = 2;
+  string owner_address = 3;
+}
+
+message CreatePaymentLinkResponse {
+  string order_id = 1;
+  string url = 2;
+}
+
+message ProcessWebhookRequest {
+  string order_id = 1;
+  string event = 2;
+  string tx_hash = 3;
+}
+
+service Withpaper {
+  rpc CreatePaymentLink (CreatePaymentLinkRequest) returns (CreatePaymentLinkResponse);
+  rpc ProcessWebhook (ProcessWebhookRequest) returns (google.protobuf.Empty);
+}

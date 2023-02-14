@@ -1,15 +1,18 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { SchemaTypes } from 'mongoose';
+import { HydratedDocument, SchemaTypes } from 'mongoose';
 import { DocumentTimestamps } from '../../utils/document';
 import { AssetType, PaymentStatuses, PaymentSystem } from '../../../utils/enums';
 
 @Schema({
   autoCreate: true,
-  collection: 'orders',
-  id: true,
+  collection: 'paymentOrders',
+  _id: false,
   timestamps: { createdAt: true, updatedAt: true },
 })
-export class Order {
+export class PaymentOrder {
+  @Prop({ type: SchemaTypes.String })
+  _id: string;
+
   @Prop({ type: SchemaTypes.String, required: true, index: true })
   ownerAddress: string;
 
@@ -19,16 +22,16 @@ export class Order {
   @Prop({ type: SchemaTypes.Number, required: true })
   status: PaymentStatuses;
 
+  @Prop({ type: SchemaTypes.Number })
+  paymentSystem: PaymentSystem;
+
   @Prop({ type: SchemaTypes.String, required: true })
   price: string;
 
   @Prop({ type: SchemaTypes.String, default: () => '' })
   txHash: string;
-
-  @Prop({ type: SchemaTypes.Number })
-  paymentSystem: PaymentSystem;
 }
 
-export type OrderDocument = Order & Document & DocumentTimestamps;
+export type PaymentOrderDocument = HydratedDocument<PaymentOrder & DocumentTimestamps>;
 
-export const OrderSchema = SchemaFactory.createForClass(Order);
+export const PaymentOrderSchema = SchemaFactory.createForClass(PaymentOrder);
