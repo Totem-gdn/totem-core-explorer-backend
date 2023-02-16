@@ -27,6 +27,6 @@ export class PaymentKey {
   txHash: string;
 }
 
-export type PaymentKeyDocument = HydratedDocument<PaymentKey> & DocumentTimestamps;
+export type PaymentKeyDocument = HydratedDocument<PaymentKey & DocumentTimestamps>;
 
 export const PaymentKeySchema = SchemaFactory.createForClass(PaymentKey);

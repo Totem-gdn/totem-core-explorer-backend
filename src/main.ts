@@ -24,7 +24,7 @@ async function bootstrap() {
         'publishers',
         'payment_keys',
         'assets',
-        'payments',
+        'withpaper',
       ],
       protoPath: [
         join(__dirname, 'health', 'proto', 'health.proto'),
@@ -34,7 +34,7 @@ async function bootstrap() {
         join(__dirname, 'publishers', 'proto', 'publishers.proto'),
         join(__dirname, 'payment-keys', 'proto', 'payment_keys.proto'),
         join(__dirname, 'assets', 'proto', 'assets.proto'),
-        join(__dirname, 'payments', 'proto', 'payments.proto'),
+        join(__dirname, 'payments', 'withpaper', 'proto', 'withpaper.proto'),
       ],
     },
   });

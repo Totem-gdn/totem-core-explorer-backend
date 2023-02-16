@@ -2,21 +2,37 @@ syntax = "proto3";
 
 package assets;
 
+import "google/protobuf/empty.proto";
+
 enum AssetType {
   AVATAR = 0;
   ITEM = 1;
   GEM = 2;
 }
 
-message ClaimAssetRequest {
-  string ownerAddress = 1;
-  AssetType assetType = 2;
+message CreateRequest {
+  AssetType asset_type = 1;
+  string contract_address = 2;
+  string price = 3;
 }
 
-message ClaimAssetResponse {
-  string txHash = 1;
+message UpdateRequest {
+  AssetType asset_type = 1;
+  optional string contract_address = 2;
+  optional string price = 3;
+}
+
+message ClaimRequest {
+  string owner_address = 1;
+  AssetType asset_type = 2;
+}
+
+message ClaimResponse {
+  string tx_hash = 1;
 }
 
 service Assets {
-  rpc ClaimAsset (ClaimAssetRequest) returns (ClaimAssetResponse);
+  rpc Create(CreateRequest) returns (google.protobuf.Empty);
+  rpc Update(UpdateRequest) returns (google.protobuf.Empty);
+  rpc Claim (ClaimRequest) returns (ClaimResponse);
 }

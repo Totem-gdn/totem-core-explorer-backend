@@ -89,14 +89,16 @@ export class PaymentKeysService {
         throw new InternalServerErrorException('invalid payment api txHash response');
       }
       await this.paymentKeyModel.findByIdAndUpdate(paymentKey._id, {
-        status: PaymentKeyStatus.Claimed,
-        txHash: axiosResponse.data.txHash,
+        $set: {
+          status: PaymentKeyStatus.Claimed,
+          txHash: axiosResponse.data.txHash,
+        },
       });
       return axiosResponse.data.txHash;
     } catch (ex) {
       this.logger.error(ex.message);
       await this.paymentKeyModel.findByIdAndUpdate(paymentKey._id, {
-        status: PaymentKeyStatus.Reserved,
+        $set: { status: PaymentKeyStatus.Reserved },
       });
       throw ex;
     }

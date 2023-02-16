@@ -24,6 +24,6 @@ export class Publisher {
   webhookUrl: string;
 }
 
-export type PublisherDocument = HydratedDocument<Publisher> & DocumentTimestamps;
+export type PublisherDocument = HydratedDocument<Publisher & DocumentTimestamps>;
 
 export const PublisherSchema = SchemaFactory.createForClass(Publisher);
