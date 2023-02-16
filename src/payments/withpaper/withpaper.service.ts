@@ -17,23 +17,6 @@ export class WithpaperService {
   private readonly defaultSuccessURL: URL;
   private readonly paymentLinkHeaders: Record<string, string>;
   private readonly paymentLinkParams: Record<AssetType, [string, string, string]>;
-  private readonly defaultPaymentLinkBody = {
-    expiresInMinutes: 15,
-    limitPerTransaction: 1,
-    redirectAfterPayment: true,
-    sendEmailOnCreation: false,
-    requireVerifiedEmail: false,
-    quantity: 1,
-    feeBearer: 'BUYER',
-    hideNativeMint: true,
-    hidePaperWallet: true,
-    hideExternalWallet: true,
-    hidePayWithCard: false,
-    hidePayWithCrypto: true,
-    hidePayWithIdeal: true,
-    sendEmailOnTransferSucceeded: false,
-    usePaperKey: false,
-  };
 
   constructor(
     private readonly configService: ConfigService,
@@ -77,14 +60,19 @@ export class WithpaperService {
     const [title, contractId, spender] = this.paymentLinkParams[request.assetType];
 
     try {
-      const url = request.successUrl ? new URL(request.successUrl) : this.defaultSuccessURL;
+      const url = request.successUrl ? new URL(request.successUrl) : new URL(this.defaultSuccessURL);
       url.searchParams.set('type', AssetTypeKey[request.assetType]);
       url.searchParams.set('payment_result', 'success');
       const withpaperAPIRequest = this.httpService
         .post<WithpaperAPIResponse>(
           'https://withpaper.com/api/2022-08-12/checkout-link-intent',
           {
-            ...this.defaultPaymentLinkBody,
+            expiresInMinutes: 15,
+            limitPerTransaction: 1,
+            redirectAfterPayment: true,
+            sendEmailOnCreation: false,
+            requireVerifiedEmail: false,
+            quantity: 1,
             metadata: {
               orderId: orderId,
             },
@@ -95,11 +83,21 @@ export class WithpaperService {
                 uri: generateDNA(request.assetType),
               },
               payment: {
-                value: `${assetRecord.price} * $QUANTITY`,
+                // FIXME: 0.001 price works only on testnet. add testnet flag/env/chainId for the future mainnet support
+                value: '0.001 * $QUANTITY',
                 currency: 'USDC',
                 spender: spender,
               },
             },
+            feeBearer: 'BUYER',
+            hideNativeMint: true,
+            hidePaperWallet: true,
+            hideExternalWallet: true,
+            hidePayWithCard: false,
+            hidePayWithCrypto: true,
+            hidePayWithIdeal: true,
+            sendEmailOnTransferSucceeded: false,
+            usePaperKey: false,
             contractId: contractId,
             title: title,
             walletAddress: request.ownerAddress,
