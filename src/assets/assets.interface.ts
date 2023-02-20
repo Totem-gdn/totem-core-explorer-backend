@@ -13,6 +13,15 @@ export interface UpdateRequest {
   price?: string;
 }
 
+export interface InfoRequest {
+  assetType: AssetType;
+}
+
+export interface InfoResponse {
+  contractAddress: string;
+  price: string;
+}
+
 export interface ClaimRequest {
   ownerAddress: string;
   assetType: AssetType;
@@ -26,6 +35,8 @@ export interface Assets {
   Create(request: CreateRequest): Observable<void>;
 
   Update(request: UpdateRequest): Observable<void>;
+
+  Info(request: InfoRequest): Observable<InfoResponse>;
 
   Claim(request: ClaimRequest): Observable<ClaimResponse>;
 }

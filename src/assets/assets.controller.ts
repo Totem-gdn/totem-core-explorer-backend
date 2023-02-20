@@ -3,7 +3,14 @@ import { GrpcMethod } from '@nestjs/microservices';
 
 import { UnhandledExceptionFilter } from '../utils/filters';
 import { RpcValidationPipe } from '../utils/pipes';
-import { ClaimRequest, ClaimResponse, CreateRequest, UpdateRequest } from './assets.interface';
+import {
+  ClaimRequest,
+  ClaimResponse,
+  CreateRequest,
+  InfoRequest,
+  InfoResponse,
+  UpdateRequest,
+} from './assets.interface';
 import { AssetsService } from '../repository/assets';
 import { TotemAsset } from '../contracts/asset/totem-asset';
 
@@ -27,8 +34,15 @@ export class AssetsController {
   }
 
   @UsePipes(new RpcValidationPipe(true))
+  @GrpcMethod('Assets', 'Info')
+  async info(request: InfoRequest): Promise<InfoResponse> {
+    const { contractAddress, price } = await this.repository.find(request.assetType);
+    return { contractAddress, price };
+  }
+
+  @UsePipes(new RpcValidationPipe(true))
   @GrpcMethod('Assets', 'Claim')
-  async claimAsset(request: ClaimRequest): Promise<ClaimResponse> {
+  async claim(request: ClaimRequest): Promise<ClaimResponse> {
     const txHash = await this.contract.claim(request.assetType, request.ownerAddress);
     return { txHash };
   }

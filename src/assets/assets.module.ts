@@ -8,6 +8,5 @@ import { AssetsController } from './assets.controller';
 @Module({
   imports: [ConfigModule, RepositoryModule, ContractsModule],
   controllers: [AssetsController],
-  providers: [],
 })
 export class AssetsModule {}
