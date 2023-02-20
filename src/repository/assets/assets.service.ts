@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { Asset, AssetDocument } from './schemas';
-import { AssetType } from '../../utils/enums';
+import { AssetType, AssetTypeKey } from '../../utils/enums';
 import { AssetData, AssetRecord } from './assets.interface';
 
 @Injectable()
@@ -27,6 +27,9 @@ export class AssetsService {
 
   async find(assetType: AssetType): Promise<AssetRecord> {
     const asset = await this.assetModel.findById(assetType);
+    if (!asset) {
+      throw new NotFoundException(`${AssetTypeKey[assetType]} not found`);
+    }
     return asset.toObject();
   }
 }

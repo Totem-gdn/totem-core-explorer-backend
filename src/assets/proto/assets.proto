@@ -22,6 +22,15 @@ message UpdateRequest {
   optional string price = 3;
 }
 
+message InfoRequest {
+  AssetType asset_type = 1;
+}
+
+message InfoResponse {
+  string contract_address = 1;
+  string price = 2;
+}
+
 message ClaimRequest {
   string owner_address = 1;
   AssetType asset_type = 2;
@@ -34,5 +43,6 @@ message ClaimResponse {
 service Assets {
   rpc Create(CreateRequest) returns (google.protobuf.Empty);
   rpc Update(UpdateRequest) returns (google.protobuf.Empty);
+  rpc Info(InfoRequest) returns (InfoResponse);
   rpc Claim (ClaimRequest) returns (ClaimResponse);
 }
