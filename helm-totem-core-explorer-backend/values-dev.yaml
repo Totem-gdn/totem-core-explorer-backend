@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: 667950714614.dkr.ecr.us-east-1.amazonaws.com/totem-core-explorer-backend 
+  repository: 667950714614.dkr.ecr.us-east-2.amazonaws.com/totem-core-explorer-backend 
   pullPolicy: Always
   tag: "dev"
 
@@ -41,14 +41,4 @@ tolerations:
     effect: "NoSchedule"
 
 env:
-   MONGODB_DATABASE: ""
-   GRPC_URL: ""
-   REDIS_URL: ""
-   PROVIDER_URL: ""
-   AVATAR_LEGACY_CONTRACT: ""
-   ITEM_LEGACY_CONTRACT: ""
-   GEM_LEGACY_CONTRACT: ""
-   GAME_LEGACY_CONTRACT: ""
-   GAMES_DIRECTORY_CONTRACT: ""
-   MONGODB_URI: ""
-   PROVIDER_PRIVATE_KEY: ""
+   ENV: ""
