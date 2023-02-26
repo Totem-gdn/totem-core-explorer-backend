@@ -20,7 +20,7 @@ service:
   targetPort: 3000
 
 ingress:
-  enabled: true
+  enabled: false
   annotations:
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/success-codes: '404'
@@ -30,14 +30,6 @@ ingress:
     alb.ingress.kubernetes.io/scheme: internet-facing
     external-dns.alpha.kubernetes.io/ingress-hostname-source: annotation-only
 
-  hosts:
-    - host: dev-api.totem.gdn
-      paths:
-        - path: /
-          pathType: Prefix
-          backend:
-            serviceName: dev-totem-core-explorer-backend
-            servicePort: 80
   tls: []
 
 resources:
