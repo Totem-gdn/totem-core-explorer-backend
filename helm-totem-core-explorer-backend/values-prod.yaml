@@ -22,14 +22,12 @@ service:
 ingress:
   enabled: false
   annotations:
-    kubernetes.io/ingress.class: alb
-    alb.ingress.kubernetes.io/success-codes: '404'
-    alb.ingress.kubernetes.io/group.name: main
-    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80},{"HTTPS": 443}]'
-    alb.ingress.kubernetes.io/ssl-redirect: '443'
-    alb.ingress.kubernetes.io/scheme: internet-facing
-    external-dns.alpha.kubernetes.io/ingress-hostname-source: annotation-only
-            
+    {}
+service:
+  type: NodePort
+  port: 50051
+  protocol: TCP
+  targetPort: 50051
   tls: []
 
 resources:
