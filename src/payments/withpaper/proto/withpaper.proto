@@ -14,6 +14,7 @@ message CreatePaymentLinkRequest {
   AssetType asset_type = 1;
   string success_url = 2;
   string owner_address = 3;
+  string image_url = 4;
 }
 
 message CreatePaymentLinkResponse {
