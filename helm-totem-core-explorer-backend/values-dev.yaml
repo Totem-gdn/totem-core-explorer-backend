@@ -11,6 +11,7 @@ image:
   tag: "dev"
 
 fullnameOverride: "dev-totem-core-explorer-backend"
+
 containerPort: 50051
 
 ingress:
@@ -31,7 +32,7 @@ resources:
   requests:
     cpu: 100m
     memory: 256Mi
-
+    
 autoscaling:
   enabled: true
   minReplicas: 1
