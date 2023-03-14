@@ -11,13 +11,7 @@ image:
   tag: "prod"
 
 fullnameOverride: "totem-core-explorer-backend"
-
-containerPort: 3000
-
-service:
-  type: NodePort
-  port: 80
-  targetPort: 3000
+containerPort: 50051
 
 ingress:
   enabled: false

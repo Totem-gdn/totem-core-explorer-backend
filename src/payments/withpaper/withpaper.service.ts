@@ -101,7 +101,8 @@ export class WithpaperService {
             contractId: contractId,
             title: title,
             walletAddress: request.ownerAddress,
-            successCallbackUrl: url.toString(),
+            imageUrl: request.imageUrl ? request.imageUrl : false,
+            // successCallbackUrl: url.toString(),
           },
           {
             headers: { ...this.paymentLinkHeaders },

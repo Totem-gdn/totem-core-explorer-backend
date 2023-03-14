@@ -12,12 +12,7 @@ image:
 
 fullnameOverride: "dev-totem-core-explorer-backend"
 
-containerPort: 3000
-
-service:
-  type: NodePort
-  port: 80
-  targetPort: 3000
+containerPort: 50051
 
 ingress:
   enabled: false
@@ -30,15 +25,14 @@ service:
   targetPort: 50051
   tls: []
 
-
 resources:
   limits:
-    cpu: 100m
-    memory: 256Mi
+    cpu: 120m
+    memory: 384Mi
   requests:
     cpu: 100m
-    memory: 128Mi
-
+    memory: 256Mi
+    
 autoscaling:
   enabled: true
   minReplicas: 1
