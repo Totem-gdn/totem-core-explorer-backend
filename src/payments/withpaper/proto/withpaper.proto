@@ -15,7 +15,7 @@ message CreatePaymentLinkRequest {
   string success_url = 2;
   string owner_address = 3;
   string image_url = 4;
-  boolean redirect = 5;
+  bool redirect = 5;
 }
 
 message CreatePaymentLinkResponse {
