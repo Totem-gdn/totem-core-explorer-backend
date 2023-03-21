@@ -6,9 +6,9 @@ storing data from contracts for faster and more flexible access.
 ## Development
 
 1. Install dependencies:
-    ```bash
-    npm install
-    ```
+   ```bash
+   npm install
+   ```
 2. Create [MongoDB](https://www.mongodb.com/compatibility/docker)
    and [Redis](https://redis.io/docs/stack/get-started/install/docker/) in Docker, or use local variants.
 3. Create `.env` file from example `.env.sample` and fill in environment variables:
@@ -26,8 +26,8 @@ storing data from contracts for faster and more flexible access.
     GAME_LEGACY_CONTRACT=
     GAMES_DIRECTORY_CONTRACT=
    ```
-   `PROVIDER_PRIVATE_KEY` must be the account that deployed the smart contracts.    
-   `*_CONTRACT` variables are the addresses of deployed smart contracts.    
+   `PROVIDER_PRIVATE_KEY` must be the account that deployed the smart contracts.  
+   `*_CONTRACT` variables are the addresses of deployed smart contracts.  
    Smart contracts can be found in the [Totem Smart Contracts](https://github.com/Totem-gdn/totem-smart-contracts)
    repository.
    `PAYMENT_API_URL` is URL to [Payment Service](https://github.com/Totem-gdn/totem-payment-service)
