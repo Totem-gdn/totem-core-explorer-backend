@@ -1,7 +1,7 @@
 # Totem Core Explorer Backend
 
 Totem Core Explorer backend service responsible for working with smart contracts deployed on the Polygon network and
-storing data from contracts for faster and more flexible access.
+storing data from contracts for faster and more flexible access. 
 
 ## Development
 
