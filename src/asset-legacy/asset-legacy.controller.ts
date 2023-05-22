@@ -59,4 +59,11 @@ export class AssetLegacyController {
       },
     };
   }
+
+  @UsePipes(new RpcValidationPipe(true))
+  @GrpcMethod('AssetLegacy', 'GamesStatistics')
+  async statistics({ gameAddress }) {
+    const res = await this.repository.countAssetsForGames(gameAddress);
+    return res;
+  }
 }
