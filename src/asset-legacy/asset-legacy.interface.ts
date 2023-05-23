@@ -54,6 +54,7 @@ export interface FindByIdResponse {
 export interface GamesStatisticRecord {
   items: Long;
   avatars: Long;
+  users: Long;
   gameAddress: string;
 }
 

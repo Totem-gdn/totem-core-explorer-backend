@@ -62,7 +62,8 @@ message FindByIdResponse {
 message GamesStatisticRecord {
   uint64 items = 1;
   uint64 avatars = 2;
-  string game_address = 3;
+  uint64 users = 3;
+  string game_address = 4;
 }
 
 message GamesStatisticsResponse {
