@@ -78,9 +78,24 @@ export class AssetLegacyService {
         },
       },
     ]);
+    const items = await this.assetLegacyModel.aggregate([
+      { $match: { gameAddress } },
+      {
+        $group: {
+          _id: {
+            asset: '$assetId',
+          },
+          count: { $sum: 1 },
+        },
+      },
+    ]);
 
     return avatars.length
-      ? avatars[0]
+      ? {
+          items: items[0],
+          avatars: avatars[0],
+          gameAddress,
+        }
       : {
           items: 0,
           avatars: 0,
