@@ -92,8 +92,8 @@ export class AssetLegacyService {
 
     return avatars.length
       ? {
-          items: items[0],
-          avatars: avatars[0],
+          items: items.length,
+          avatars: avatars.length,
           gameAddress,
         }
       : {
