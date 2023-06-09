@@ -51,10 +51,27 @@ export interface FindByIdResponse {
   record: AssetLegacyRecord;
 }
 
+export interface GamesStatisticRecord {
+  items: Long;
+  avatars: Long;
+  users: Long;
+  gameAddress: string;
+}
+
+export interface GamesStatisticsResponse {
+  results: GamesStatisticRecord[];
+}
+
+export interface GamesStatisticsRequest {
+  gameAddress: string;
+}
+
 export interface AssetLegacy {
   Create(request: CreateAssetLegacyRequest): Observable<CreateAssetLegacyResponse>;
 
   FindAll(request: FindAllRequest): Observable<FindAllResponse>;
 
   FindById(request: FindByIdRequest): Observable<FindByIdResponse>;
+
+  GamesStatistics(request: GamesStatisticsRequest): Observable<GamesStatisticRecord>;
 }

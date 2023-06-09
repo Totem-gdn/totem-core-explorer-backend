@@ -63,51 +63,51 @@ export class WithpaperService {
       const url = request.successUrl ? new URL(request.successUrl) : new URL(this.defaultSuccessURL);
       url.searchParams.set('type', AssetTypeKey[request.assetType]);
       url.searchParams.set('payment_result', 'success');
+      const withpaperBody: any = {
+        expiresInMinutes: 15,
+        limitPerTransaction: 1,
+        redirectAfterPayment: true,
+        sendEmailOnCreation: false,
+        requireVerifiedEmail: false,
+        quantity: 1,
+        metadata: {
+          orderId: orderId,
+        },
+        mintMethod: {
+          name: 'safeMint(address,string)',
+          args: {
+            to: '$WALLET',
+            uri: generateDNA(request.assetType),
+          },
+          payment: {
+            // FIXME: 0.001 price works only on testnet. add testnet flag/env/chainId for the future mainnet support
+            value: '0.001 * $QUANTITY',
+            currency: 'USDC',
+            spender: spender,
+          },
+        },
+        feeBearer: 'BUYER',
+        hideNativeMint: true,
+        hidePaperWallet: true,
+        hideExternalWallet: true,
+        hidePayWithCard: false,
+        hidePayWithCrypto: true,
+        hidePayWithIdeal: true,
+        sendEmailOnTransferSucceeded: false,
+        usePaperKey: false,
+        contractId: contractId,
+        title: title,
+        walletAddress: request.ownerAddress,
+        imageUrl: request.imageUrl ? request.imageUrl : false,
+        // successCallbackUrl: url.toString(),
+      };
+      if (request.redirect) {
+        withpaperBody.successCallbackUrl = url.toString();
+      }
       const withpaperAPIRequest = this.httpService
-        .post<WithpaperAPIResponse>(
-          'https://withpaper.com/api/2022-08-12/checkout-link-intent',
-          {
-            expiresInMinutes: 15,
-            limitPerTransaction: 1,
-            redirectAfterPayment: true,
-            sendEmailOnCreation: false,
-            requireVerifiedEmail: false,
-            quantity: 1,
-            metadata: {
-              orderId: orderId,
-            },
-            mintMethod: {
-              name: 'safeMint(address,string)',
-              args: {
-                to: '$WALLET',
-                uri: generateDNA(request.assetType),
-              },
-              payment: {
-                // FIXME: 0.001 price works only on testnet. add testnet flag/env/chainId for the future mainnet support
-                value: '0.001 * $QUANTITY',
-                currency: 'USDC',
-                spender: spender,
-              },
-            },
-            feeBearer: 'BUYER',
-            hideNativeMint: true,
-            hidePaperWallet: true,
-            hideExternalWallet: true,
-            hidePayWithCard: false,
-            hidePayWithCrypto: true,
-            hidePayWithIdeal: true,
-            sendEmailOnTransferSucceeded: false,
-            usePaperKey: false,
-            contractId: contractId,
-            title: title,
-            walletAddress: request.ownerAddress,
-            imageUrl: request.imageUrl ? request.imageUrl : false,
-            // successCallbackUrl: url.toString(),
-          },
-          {
-            headers: { ...this.paymentLinkHeaders },
-          },
-        )
+        .post<WithpaperAPIResponse>('https://withpaper.com/api/2022-08-12/checkout-link-intent', withpaperBody, {
+          headers: { ...this.paymentLinkHeaders },
+        })
         .pipe(
           catchError((error: AxiosError) => {
             this.logger.error(error.response?.data || error.message);

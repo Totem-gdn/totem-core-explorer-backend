@@ -7,6 +7,7 @@ export interface CreatePaymentLinkRequest {
   ownerAddress: string;
   successUrl?: string;
   imageUrl?: string;
+  redirect: boolean;
 }
 
 export interface CreatePaymentLinkResponse {

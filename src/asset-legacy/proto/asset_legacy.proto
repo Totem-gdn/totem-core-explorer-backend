@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package asset_legacy;
 
+import "google/protobuf/empty.proto";
+
 enum AssetType {
   AVATAR = 0;
   ITEM = 1;
@@ -57,8 +59,24 @@ message FindByIdResponse {
   AssetLegacyRecord record = 1;
 }
 
+message GamesStatisticRecord {
+  uint64 items = 1;
+  uint64 avatars = 2;
+  uint64 users = 3;
+  string game_address = 4;
+}
+
+message GamesStatisticsResponse {
+  repeated GamesStatisticRecord results = 1;
+}
+
+message GamesStatisticsRequest {
+  string game_address = 1;
+}
+
 service AssetLegacy {
   rpc Create (CreateAssetLegacyRequest) returns (CreateAssetLegacyResponse);
   rpc FindAll (FindAllRequest) returns (FindAllResponse);
   rpc FindById (FindByIdRequest) returns (FindByIdResponse);
+  rpc GamesStatistics (GamesStatisticsRequest) returns (GamesStatisticRecord);
 }

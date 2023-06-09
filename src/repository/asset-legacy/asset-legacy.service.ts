@@ -66,6 +66,56 @@ export class AssetLegacyService {
     return record.toObject();
   }
 
+  async countAssetsForGames(gameAddress: string) {
+    const avatars = await this.avatarLegacyModel.aggregate([
+      { $match: { gameAddress } },
+      {
+        $group: {
+          _id: {
+            asset: '$assetId',
+          },
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+    const items = await this.assetLegacyModel.aggregate([
+      { $match: { gameAddress } },
+      {
+        $group: {
+          _id: {
+            asset: '$assetId',
+          },
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+    const users = await this.avatarLegacyModel.aggregate([
+      { $match: { gameAddress } },
+      {
+        $group: {
+          _id: {
+            player: '$playerAddress',
+          },
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    return avatars.length
+      ? {
+          items: items.length,
+          avatars: avatars.length,
+          users: users.length,
+          gameAddress,
+        }
+      : {
+          items: 0,
+          avatars: 0,
+          users: 0,
+          gameAddress,
+        };
+  }
+
   private getModel(assetType: AssetType): Model<AvatarLegacyDocument | ItemLegacyDocument | GemLegacyDocument> {
     switch (assetType) {
       case AssetType.AVATAR:
