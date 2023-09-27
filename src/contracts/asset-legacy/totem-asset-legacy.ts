@@ -94,7 +94,7 @@ export class TotemAssetLegacy implements OnApplicationBootstrap {
       .get(this.storageKeys[assetType])
       .then((blockNumber: string | null) => parseInt(blockNumber || '30575000', 10));
     let currentBlock = await this.providerService.getBlockNumber();
-    const blocksPerPage = 2000;
+    const blocksPerPage = 1000;
     while (currentBlock > block) {
       this.contractLogger[assetType].log(`fetching block from ${block} to ${block + blocksPerPage}`);
       let maxBlockNumber = block;

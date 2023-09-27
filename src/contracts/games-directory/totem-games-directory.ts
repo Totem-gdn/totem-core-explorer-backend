@@ -61,7 +61,7 @@ export class TotemGamesDirectory implements OnApplicationBootstrap {
       .get(this.storageKey)
       .then((blockNumber: string | null) => parseInt(blockNumber || '30575000', 10));
     let currentBlock = await this.providerService.getBlockNumber();
-    const blocksPerPage = 2000;
+    const blocksPerPage = 1000;
     while (currentBlock > block) {
       this.logger.log(`fetching block from ${block} to ${block + blocksPerPage}`);
       let maxBlockNumber = block;
