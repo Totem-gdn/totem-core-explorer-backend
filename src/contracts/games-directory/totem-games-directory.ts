@@ -65,20 +65,25 @@ export class TotemGamesDirectory implements OnApplicationBootstrap {
     while (currentBlock > block) {
       this.logger.log(`fetching block from ${block} to ${block + blocksPerPage}`);
       let maxBlockNumber = block;
-      const createEvents = await this.contract.queryFilter('CreateGame', block, block + blocksPerPage);
+      let lastBlock = block + blocksPerPage;
+      if (Number(lastBlock) > Number(currentBlock)) {
+        console.log('USE CURRENT BLOCK AS LATEST');
+        lastBlock = currentBlock;
+      }
+      const createEvents = await this.contract.queryFilter('CreateGame', block, lastBlock);
       for (const event of createEvents) {
         const [gameAddress, ownerAddress] = event.args;
         await this.createGame(gameAddress, ownerAddress, event);
         maxBlockNumber = event.blockNumber > maxBlockNumber ? event.blockNumber : maxBlockNumber;
       }
-      const updateEvents = await this.contract.queryFilter('UpdateGame', block, block + blocksPerPage);
+      const updateEvents = await this.contract.queryFilter('UpdateGame', block, lastBlock);
       for (const event of updateEvents) {
         const [gameAddress] = event.args;
         await this.updateGame(gameAddress, event);
         maxBlockNumber = event.blockNumber > maxBlockNumber ? event.blockNumber : maxBlockNumber;
       }
       await this.redis.set(this.storageKey, maxBlockNumber);
-      block += blocksPerPage + 1;
+      block = lastBlock + 1;
       currentBlock = await this.providerService.getBlockNumber();
     }
     this.logger.log(`fetching of previous events complete`);

@@ -63,14 +63,19 @@ export class TotemGameLegacy implements OnApplicationBootstrap {
     while (currentBlock > block) {
       this.logger.log(`fetching block from ${block} to ${block + blocksPerPage}`);
       let maxBlockNumber = block;
-      const events = await this.contract.queryFilter('GameLegacyRecord', block, block + blocksPerPage);
+      let lastBlock = block + blocksPerPage;
+      if (Number(lastBlock) > Number(currentBlock)) {
+        console.log('USE CURRENT BLOCK AS LATEST');
+        lastBlock = currentBlock;
+      }
+      const events = await this.contract.queryFilter('GameLegacyRecord', block, lastBlock);
       for (const event of events) {
         const [gameAddress, recordId] = event.args;
         await this.createRecord(gameAddress, recordId, event);
         maxBlockNumber = event.blockNumber;
       }
       await this.redis.set(this.storageKey, maxBlockNumber);
-      block += blocksPerPage + 1;
+      block = lastBlock + 1;
       currentBlock = await this.providerService.getBlockNumber();
     }
     this.logger.log(`fetching of previous events complete`);
